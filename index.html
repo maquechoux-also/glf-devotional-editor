@@ -216,23 +216,30 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .pull-quote-tip {
-      background: #f0f4ff;
-      border: 1.5px dashed #c5d3f0;
-      border-radius: 7px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: var(--navy);
-      margin-bottom: 8px;
-      line-height: 1.85;
+    .body-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
     }
-    .pull-quote-tip code {
-      background: #e2e8ff;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-family: 'Courier New', Courier, monospace;
+    .btn-pull-quote {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 50px;
       font-size: 12px;
-      color: var(--purple);
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .btn-pull-quote:hover { background: #dba96e; transform: translateY(-1px); }
+    .btn-pull-quote:active { transform: translateY(0); }
+    .body-toolbar-hint {
+      font-size: 11px;
+      color: var(--muted);
     }
 
     @media (max-width: 600px) {
@@ -327,9 +334,9 @@
       </div>
       <div class="field">
         <label>All Body Copy <span class="hint">one blank line between each paragraph</span></label>
-        <div class="pull-quote-tip">
-          To mark the <strong>pull quote</strong> callout box, wrap that paragraph in <code>**double asterisks**</code> on its own line — it can go anywhere in the flow:<br>
-          <code>**"This is the sentence you want highlighted."**</code>
+        <div class="body-toolbar">
+          <button class="btn-pull-quote" id="btn_make_pull_quote" type="button">⬥ Make Pull Quote</button>
+          <span class="body-toolbar-hint">Select a sentence in the text below, then click</span>
         </div>
         <textarea id="body_content" rows="18">"What are you worth?" It's a question many of us answer based on performance. If we're doing well, we feel valuable. If we fail, we feel less than. Religion reinforces this idea by tying our worth to what we accomplish. But the gospel frees us from religion's bondage!
 
@@ -423,13 +430,17 @@ So when you feel insignificant or rejected, come back to this truth: your value 
     });
 
     // Auto-convert straight " (inch mark) to curly “ ” based on context.
-    // Opening when preceded by start-of-string, whitespace, or opening bracket; otherwise closing.
+    // Opening when preceded by start-of-string, whitespace, opening bracket, or asterisks
+    // (e.g. the " immediately after ** in a pull-quote marker should open, not close).
     function smartenQuotes(text) {
       let out = '';
       for (let i = 0; i < text.length; i++) {
         const ch = text[i];
         if (ch === '"') {
-          const prev = i > 0 ? text[i - 1] : '';
+          // Walk back past any asterisks to find the real preceding context character
+          let j = i - 1;
+          while (j >= 0 && text[j] === '*') j--;
+          const prev = j >= 0 ? text[j] : '';
           out += (prev === '' || /[\s(\[\{]/.test(prev)) ? '“' : '”';
         } else {
           out += ch;
@@ -450,6 +461,48 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       });
       // Smarten any pre-filled value on load
       el.value = smartenQuotes(el.value);
+    });
+
+    // "Make Pull Quote" button — wraps the selected textarea text in **...** on its own line.
+    document.getElementById('btn_make_pull_quote').addEventListener('click', () => {
+      const ta = document.getElementById('body_content');
+      const start = ta.selectionStart;
+      const end   = ta.selectionEnd;
+
+      if (start === end) {
+        // Nothing selected — flash the hint text briefly
+        const hint = document.querySelector('.body-toolbar-hint');
+        const orig = hint.textContent;
+        hint.textContent = '⚠ Select some text first';
+        hint.style.color = '#e05a3a';
+        setTimeout(() => { hint.textContent = orig; hint.style.color = ''; }, 2200);
+        return;
+      }
+
+      const value    = ta.value;
+      const selected = value.slice(start, end).trim();
+
+      // Strip any existing ** wrapping so the action is idempotent
+      const inner = selected.replace(/^\*\*\s*([\s\S]*?)\s*\*\*$/, '$1').trim();
+
+      // Build the replacement: ensure blank lines isolate the pull-quote block
+      const before = value.slice(0, start);
+      const after  = value.slice(end);
+      const needsNewlineBefore = before.length > 0 && !before.endsWith('\n\n');
+      const needsNewlineAfter  = after.length  > 0 && !after.startsWith('\n\n');
+
+      const prefix = needsNewlineBefore ? (before.endsWith('\n') ? '\n' : '\n\n') : '';
+      const suffix = needsNewlineAfter  ? (after.startsWith('\n') ? '\n' : '\n\n') : '';
+
+      const wrapped    = `**${inner}**`;
+      const newValue   = before + prefix + wrapped + suffix + after;
+      const newCursorPos = (before + prefix + wrapped).length;
+
+      ta.value = newValue;
+      ta.setSelectionRange(newCursorPos, newCursorPos);
+
+      // Re-trigger auto-resize
+      ta.dispatchEvent(new Event('input'));
     });
 
     // Escape HTML special characters (for user-typed content)
