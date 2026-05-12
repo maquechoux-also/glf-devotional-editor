@@ -480,9 +480,10 @@ So when you feel insignificant or rejected, come back to this truth: your value 
         if (quoteMatch) {
           const qt = esc(quoteMatch[1].trim());
           html += `
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 28px 0;">
-                <tr>
-                  <td style="background-color:#eef3f8; border-left: 4px solid #eac18b; border-radius: 0 8px 8px 0; padding: 20px 24px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 28px 0; background-color:#eef3f8;">
+                <tr bgcolor="#eef3f8">
+                  <td width="4" style="background-color:#eac18b; border-radius:3px; min-width:4px; width:4px;" valign="top">&nbsp;</td>
+                  <td style="background-color:#eef3f8; border-radius:0 8px 8px 0; padding: 20px 24px;">
                     <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:19px; line-height:30px; font-weight:500; font-style:italic; color:#081158;">${qt}</p>
                   </td>
                 </tr>
@@ -526,12 +527,11 @@ So when you feel insignificant or rejected, come back to this truth: your value 
   <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
   <style type="text/css">
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
-    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
-    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
-    body { font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
     @media screen and (max-width: 620px) {
       .email-container { width: 100% !important; }
       .fluid { max-width: 100% !important; height: auto !important; }
@@ -561,7 +561,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="60" align="center" style="margin: 0 auto;">
                       <tr><td style="background-color:#ec8675; height:3px; border-radius:2px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
                     </table>
-                    <p style="margin:14px 0 0 0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:400; color:rgba(255,255,255,0.65); letter-spacing:1px;">${emailDate}</p>
+                    <p style="margin:14px 0 0 0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:400; color:#a8b5ce; letter-spacing:1px;">${emailDate}</p>
                   </td>
                 </tr>
               </table>
@@ -578,7 +578,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                   <td>
                     <p style="margin:0 0 12px 0; font-family:'Inter',Arial,sans-serif; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#ec8675;">Scripture</p>
                     <p class="scripture-text" style="margin:0 0 16px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:24px; line-height:36px; font-weight:400; font-style:italic; color:#ffffff;">${scriptureText}</p>
-                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.55);">${scriptureRef}</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#8fa0be;">${scriptureRef}</p>
                   </td>
                 </tr>
               </table>
@@ -591,7 +591,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
               <h2 class="section-heading" style="margin:0 0 8px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:30px; line-height:1.2; font-weight:600; color:#081158;">${devotionalTitle}</h2>
               <p style="margin:0 0 28px 0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:400; color:#8ea5a0; letter-spacing:0.5px;">${devotionalByline}</p>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:28px;">
-                <tr><td style="background-color:#d2e4e0; height:1px;"></td></tr>
+                <tr><td style="background-color:#d2e4e0; height:1px; font-size:1px; line-height:1px; mso-line-height-rule:exactly;">&nbsp;</td></tr>
               </table>
               ${bodyContent}
             </td>
@@ -657,11 +657,11 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                 <tr>
                   <td align="center">
                     <p style="margin:0 0 6px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">${giveHeadline}</p>
-                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:rgba(255,255,255,0.65); line-height:22px;">${giveSubtext}</p>
+                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:#a8b5ce; line-height:22px;">${giveSubtext}</p>
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
                       <tr>
                         <td style="border-radius:50px; background-color:#5532FA;">
-                          <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; border-radius:50px; mso-padding-alt:14px 40px;">GIVE</a>
+                          <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; mso-padding-alt:14px 40px;">GIVE</a>
                         </td>
                       </tr>
                     </table>
@@ -689,7 +689,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                 </tr>
                 <tr>
                   <td align="center" style="padding-bottom:20px;">
-                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:rgba(255,255,255,0.4);">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
                   </td>
                 </tr>
                 <tr>
@@ -717,13 +717,13 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                 </tr>
                 <tr>
                   <td align="center">
-                    <a href="https://www.gracelifefellowship.org" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Website</a>
-                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">·</span>
-                    <a href="https://www.gracelifefellowship.org/media/main" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Sermons</a>
-                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">·</span>
-                    <a href="https://www.gracelifefellowship.org/events" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Events</a>
-                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">·</span>
-                    <a href="https://www.gracelifefellowship.org/give" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Give</a>
+                    <a href="https://www.gracelifefellowship.org" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Website</a>
+                    <span style="color:#4a5a75; font-size:12px;">·</span>
+                    <a href="https://www.gracelifefellowship.org/media/main" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Sermons</a>
+                    <span style="color:#4a5a75; font-size:12px;">·</span>
+                    <a href="https://www.gracelifefellowship.org/events" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Events</a>
+                    <span style="color:#4a5a75; font-size:12px;">·</span>
+                    <a href="https://www.gracelifefellowship.org/give" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Give</a>
                   </td>
                 </tr>
               </table>
