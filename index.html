@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLF Devotional Editor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #081158;
+      --deep-navy: #050d3d;
+      --mid-navy:  #0c1a6e;
+      --coral:     #ec8675;
+      --light-blue:#5b95d2;
+      --teal:      #d2e4e0;
+      --purple:    #5532FA;
+      --gold:      #eac18b;
+      --bg:        #eef3f8;
+      --white:     #ffffff;
+      --text:      #1a1a2e;
+      --muted:     #8ea5a0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Sticky header ── */
+    .site-header {
+      background: var(--navy);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(8,17,88,0.35);
+    }
+    .site-header .brand h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.3px;
+    }
+    .site-header .brand p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 2px;
+    }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-copy {
+      background: var(--purple);
+      color: white;
+      border: none;
+      padding: 11px 26px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .btn-copy:hover { background: #6a46ff; transform: translateY(-1px); }
+    .btn-copy.success { background: #27ae60; }
+
+    .btn-download {
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      padding: 10px 18px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-download:hover { border-color: rgba(255,255,255,0.5); color: white; }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 36px 24px 100px;
+    }
+
+    .tip {
+      background: white;
+      border-left: 4px solid var(--coral);
+      border-radius: 0 10px 10px 0;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(8,17,88,0.06);
+    }
+    .tip strong { color: var(--navy); }
+
+    /* ── Form sections ── */
+    .form-section {
+      background: white;
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 6px rgba(8,17,88,0.07);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1.5px solid var(--bg);
+    }
+    .section-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .section-header h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 3px;
+    }
+    .section-header p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .field label .hint {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 5px;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #dde6f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.65;
+      transition: border-color 0.2s, background 0.2s;
+      resize: vertical;
+      background: #fafcff;
+    }
+    .field textarea { font-family: Georgia, 'Times New Roman', serif; }
+    .field input { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--light-blue);
+      background: white;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--deep-navy);
+      color: white;
+      padding: 13px 22px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .pull-quote-tip {
+      background: #f0f4ff;
+      border: 1.5px dashed #c5d3f0;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--navy);
+      margin-bottom: 8px;
+      line-height: 1.85;
+    }
+    .pull-quote-tip code {
+      background: #e2e8ff;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: var(--purple);
+    }
+
+    @media (max-width: 600px) {
+      .field-grid { grid-template-columns: 1fr; }
+      .site-header { flex-direction: column; gap: 12px; text-align: center; }
+      .form-section { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="site-header">
+    <div class="brand">
+      <h1>✦ GLF Weekly Devotional Editor</h1>
+      <p>Fill in the fields below, then copy the HTML into Elexio</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-download" onclick="downloadHTML()">⬇ Download</button>
+      <button class="btn-copy" onclick="copyHTML()" id="copyBtn">📋 Copy HTML</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <div class="tip">
+      <strong>How to use:</strong> Each field is pre-filled with last week's content as a starting point — just update whatever's changing this week. When you're done, click <strong>Copy HTML</strong> in the header, then paste into Elexio's code view. That's it!
+    </div>
+
+    <!-- ── EMAIL HEADER ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">📧</div>
+        <div>
+          <h2>Email Header</h2>
+          <p>The title and date shown at the top of the email</p>
+        </div>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Email Title</label>
+          <input type="text" id="email_title" value="Weekly Devotional">
+        </div>
+        <div class="field">
+          <label>Date Line <span class="hint">e.g. Week of May 18, 2026</span></label>
+          <input type="text" id="email_date" value="Week of May 11, 2026">
+        </div>
+      </div>
+      <div class="field">
+        <label>Preview Text <span class="hint">short teaser shown in the inbox before someone opens the email</span></label>
+        <input type="text" id="preheader" value="What are you worth? This week Pastor Tim shares how the cross is the final answer.">
+      </div>
+    </div>
+
+    <!-- ── SCRIPTURE ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">📖</div>
+        <div>
+          <h2>Scripture</h2>
+          <p>The featured verse for this week</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Verse Text</label>
+        <textarea id="scripture_text" rows="3">"For you have been bought with a price: therefore glorify God in your body."</textarea>
+      </div>
+      <div class="field">
+        <label>Reference <span class="hint">e.g. John 3:16 · ESV</span></label>
+        <input type="text" id="scripture_reference" value="1 Corinthians 6:20 · NASB">
+      </div>
+    </div>
+
+    <!-- ── DEVOTIONAL CONTENT ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">✍️</div>
+        <div>
+          <h2>Devotional Content</h2>
+          <p>Paste the full devotional here — separate paragraphs with a blank line</p>
+        </div>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Devotional Title</label>
+          <input type="text" id="devotional_title" value="What Are You Worth?">
+        </div>
+        <div class="field">
+          <label>Author / Byline</label>
+          <input type="text" id="devotional_byline" value="Devotional from Pastor Tim Chalas">
+        </div>
+      </div>
+      <div class="field">
+        <label>All Body Copy <span class="hint">one blank line between each paragraph</span></label>
+        <div class="pull-quote-tip">
+          To mark the <strong>pull quote</strong> callout box, wrap that paragraph in <code>**double asterisks**</code> on its own line — it can go anywhere in the flow:<br>
+          <code>**"This is the sentence you want highlighted."**</code>
+        </div>
+        <textarea id="body_content" rows="18">"What are you worth?" It's a question many of us answer based on performance. If we're doing well, we feel valuable. If we fail, we feel less than. Religion reinforces this idea by tying our worth to what we accomplish. But the gospel frees us from religion's bondage!
+
+Your worth is not measured by your effort, your success, or your consistency. It is revealed by the price God was willing to pay for you. And that price was His Son. Picture a scale for a moment: you on one side, and on the other, the price required to balance it. God placed Jesus there for you. That means your value to Him is not fluctuating or uncertain. It is settled and unchanging.
+
+**"You are not worth what you do, how you feel, or what others may think… you are worth what God paid."**
+
+This kind of value is not earned; it is received. It flows from God's love, not your performance. Even when feelings or circumstances try to convince you otherwise, the cross stands as the permanent declaration of your worth.
+
+So when you feel insignificant or rejected, come back to this truth: your value was determined long before your greatest success or worst failure. You are deeply loved, fully accepted, and incredibly valued by God. Let that truth reshape how you see yourself today — and when you know your worth, you have something to share that is priceless… His unfailing love!</textarea>
+      </div>
+    </div>
+
+    <!-- ── REFLECT & RESPOND ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">💬</div>
+        <div>
+          <h2>Reflect &amp; Respond</h2>
+          <p>Three discussion or personal reflection questions</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Question 1</label>
+        <textarea id="question_1" rows="2">What measuring stick have you been using to determine your own worth — performance, others' approval, or how you feel? How has that been affecting you?</textarea>
+      </div>
+      <div class="field">
+        <label>Question 2</label>
+        <textarea id="question_2" rows="2">In what areas of your life do you find it hardest to believe that your worth is "settled and unchanging" in God's eyes?</textarea>
+      </div>
+      <div class="field">
+        <label>Question 3</label>
+        <textarea id="question_3" rows="2">How might knowing your true worth change the way you treat yourself — and the way you share God's love with others this week?</textarea>
+      </div>
+    </div>
+
+    <!-- ── CLOSING & PRAYER ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">🙏</div>
+        <div>
+          <h2>Closing &amp; Prayer</h2>
+          <p>The weekly prayer and pastor's signature</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Prayer</label>
+        <textarea id="closing_prayer" rows="4">Father, thank You that my worth has never been up for debate. The cross settled it. Help me to stop striving to earn what You have already freely given. When the voices of doubt come, remind me of the price You paid — and let that truth be the foundation I stand on today. In Jesus' name, Amen.</textarea>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Closing Greeting</label>
+          <input type="text" id="closing_greeting" value="Grace and peace,">
+        </div>
+        <div class="field">
+          <label>Signature Name</label>
+          <input type="text" id="closing_name" value="Pastor Tim Chalas &amp; the Grace Life Team">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GIVE CTA ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">🎁</div>
+        <div>
+          <h2>Give Section</h2>
+          <p>Giving call-to-action at the bottom — usually doesn't change week to week</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Headline</label>
+        <input type="text" id="give_headline" value="Has this been a blessing to you?">
+      </div>
+      <div class="field">
+        <label>Sub-text</label>
+        <textarea id="give_subtext" rows="2">Consider giving financially to support the ministry of Grace Life Fellowship.</textarea>
+      </div>
+    </div>
+
+  </div><!-- /.main -->
+
+  <div class="toast" id="toast">✅ HTML copied! Now paste it into Elexio's code view.</div>
+
+  <script>
+    // Auto-resize all textareas on input
+    document.querySelectorAll('textarea').forEach(ta => {
+      function resize() { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; }
+      ta.addEventListener('input', resize);
+      resize();
+    });
+
+    // Escape HTML special characters (for user-typed content)
+    function esc(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function val(id) {
+      return esc(document.getElementById(id).value.trim());
+    }
+
+    // Parses the combined body textarea — splits on blank lines,
+    // treats **text** blocks as pull quote callouts, everything else as <p>.
+    function parseBodyContent() {
+      const raw = document.getElementById('body_content').value.trim();
+      const blocks = raw.split(/\n[ \t]*\n/).map(b => b.trim()).filter(b => b.length > 0);
+
+      // Find last regular paragraph index so we can drop its bottom margin
+      let lastParaIdx = -1;
+      blocks.forEach((b, i) => { if (!/^\*\*[\s\S]+\*\*$/.test(b)) lastParaIdx = i; });
+
+      let html = '';
+      blocks.forEach((block, idx) => {
+        const quoteMatch = block.match(/^\*\*([\s\S]+)\*\*$/);
+        if (quoteMatch) {
+          const qt = esc(quoteMatch[1].trim());
+          html += `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 28px 0;">
+                <tr>
+                  <td style="background-color:#eef3f8; border-left: 4px solid #eac18b; border-radius: 0 8px 8px 0; padding: 20px 24px;">
+                    <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:19px; line-height:30px; font-weight:500; font-style:italic; color:#081158;">${qt}</p>
+                  </td>
+                </tr>
+              </table>`;
+        } else {
+          const mb = idx === lastParaIdx ? '0' : '20px';
+          html += `
+              <p style="margin:0 0 ${mb} 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:17px; line-height:30px; font-weight:400; color:#1a1a2e;">${esc(block)}</p>`;
+        }
+      });
+      return html;
+    }
+
+    function buildHTML() {
+      const preheader        = val('preheader');
+      const emailTitle       = val('email_title');
+      const emailDate        = val('email_date');
+      const scriptureText    = val('scripture_text');
+      const scriptureRef     = val('scripture_reference');
+      const devotionalTitle  = val('devotional_title');
+      const devotionalByline = val('devotional_byline');
+      const bodyContent      = parseBodyContent();
+      const q1               = val('question_1');
+      const q2               = val('question_2');
+      const q3               = val('question_3');
+      const closingPrayer    = val('closing_prayer');
+      const closingGreeting  = val('closing_greeting');
+      const closingName      = val('closing_name');
+      const giveHeadline     = val('give_headline');
+      const giveSubtext      = val('give_subtext');
+
+      return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <title>Grace Life Fellowship — Weekly Devotional</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+    body { font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
+    @media screen and (max-width: 620px) {
+      .email-container { width: 100% !important; }
+      .fluid { max-width: 100% !important; height: auto !important; }
+      .pad-mobile { padding-left: 24px !important; padding-right: 24px !important; }
+      .scripture-text { font-size: 21px !important; line-height: 32px !important; }
+      .section-heading { font-size: 26px !important; }
+    }
+  </style>
+</head>
+<body width="100%" style="margin:0; padding:0; background-color:#eef3f8;">
+
+  <div style="display:none; max-height:0px; overflow:hidden;">${preheader}&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌</div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#eef3f8;">
+    <tr>
+      <td align="center" valign="top" style="padding: 24px 12px;">
+        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width:600px; margin:auto;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background-color:#081158; border-radius:12px 12px 0 0; padding: 36px 48px 32px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 6px 0; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:#5b95d2;">Grace Life Fellowship</p>
+                    <h1 style="margin:0 0 12px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:38px; line-height:1.15; font-weight:500; color:#ffffff; letter-spacing:-0.5px;">${emailTitle}</h1>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="60" align="center" style="margin: 0 auto;">
+                      <tr><td style="background-color:#ec8675; height:3px; border-radius:2px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>
+                    <p style="margin:14px 0 0 0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:400; color:rgba(255,255,255,0.65); letter-spacing:1px;">${emailDate}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- SCRIPTURE -->
+          <tr>
+            <td style="background-color:#0c1a6e; padding: 32px 48px 36px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td width="4" style="background-color:#ec8675; border-radius:3px; min-width:4px;" valign="top">&nbsp;</td>
+                  <td width="20" style="min-width:20px;">&nbsp;</td>
+                  <td>
+                    <p style="margin:0 0 12px 0; font-family:'Inter',Arial,sans-serif; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#ec8675;">Scripture</p>
+                    <p class="scripture-text" style="margin:0 0 16px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:24px; line-height:36px; font-weight:400; font-style:italic; color:#ffffff;">${scriptureText}</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.55);">${scriptureRef}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- DEVOTIONAL BODY -->
+          <tr>
+            <td style="background-color:#ffffff; padding: 44px 48px 40px;" class="pad-mobile">
+              <h2 class="section-heading" style="margin:0 0 8px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:30px; line-height:1.2; font-weight:600; color:#081158;">${devotionalTitle}</h2>
+              <p style="margin:0 0 28px 0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:400; color:#8ea5a0; letter-spacing:0.5px;">${devotionalByline}</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:28px;">
+                <tr><td style="background-color:#d2e4e0; height:1px;"></td></tr>
+              </table>
+              ${bodyContent}
+            </td>
+          </tr>
+
+          <!-- REFLECT & RESPOND -->
+          <tr>
+            <td style="background-color:#d2e4e0; padding: 36px 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">Reflect &amp; Respond</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:16px;">
+                      <tr>
+                        <td width="30" valign="top" style="padding-top:1px;"><div style="width:24px; height:24px; background-color:#081158; border-radius:50%; text-align:center; line-height:24px; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; color:#ffffff;">1</div></td>
+                        <td style="font-family:'Inter',Arial,sans-serif; font-size:15px; line-height:26px; color:#1a1a2e; padding-left:6px;">${q1}</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:16px;">
+                      <tr>
+                        <td width="30" valign="top" style="padding-top:1px;"><div style="width:24px; height:24px; background-color:#081158; border-radius:50%; text-align:center; line-height:24px; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; color:#ffffff;">2</div></td>
+                        <td style="font-family:'Inter',Arial,sans-serif; font-size:15px; line-height:26px; color:#1a1a2e; padding-left:6px;">${q2}</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="30" valign="top" style="padding-top:1px;"><div style="width:24px; height:24px; background-color:#081158; border-radius:50%; text-align:center; line-height:24px; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; color:#ffffff;">3</div></td>
+                        <td style="font-family:'Inter',Arial,sans-serif; font-size:15px; line-height:26px; color:#1a1a2e; padding-left:6px;">${q3}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CLOSING & PRAYER -->
+          <tr>
+            <td style="background-color:#ffffff; padding: 36px 48px 40px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="background-color:#eef3f8; border-radius:8px; padding: 24px 28px;">
+                    <p style="margin:0 0 8px 0; font-family:'Inter',Arial,sans-serif; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#ec8675;">A Prayer for This Week</p>
+                    <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:16px; line-height:28px; font-style:italic; color:#1a1a2e;">${closingPrayer}</p>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top:32px;">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 4px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:17px; font-weight:500; color:#081158;">${closingGreeting}</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; color:#5b95d2; letter-spacing:0.5px;">${closingName}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- GIVE CTA -->
+          <tr>
+            <td style="background-color:#081158; padding: 32px 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 6px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">${giveHeadline}</p>
+                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:rgba(255,255,255,0.65); line-height:22px;">${giveSubtext}</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="border-radius:50px; background-color:#5532FA;">
+                          <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; border-radius:50px; mso-padding-alt:14px 40px;">GIVE</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#050d3d; border-radius:0 0 12px 12px; padding: 32px 48px 36px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom:12px;">
+                    <img src="https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a025f4f152c26a0f09c8a73_GLF_white_bug.png" alt="Grace Life Fellowship" width="72" style="width:72px; height:auto; display:block; margin:0 auto; border:0; outline:none; text-decoration:none;">
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="40" align="center">
+                      <tr><td style="background-color:#ec8675; height:2px; border-radius:1px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:20px;">
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:rgba(255,255,255,0.4);">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.youtube.com/@gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#FF0000; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:16px; font-weight:700; color:#ffffff; line-height:40px; display:block;">&#9654;</span></td></tr></table>
+                          </a>
+                        </td>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.instagram.com/gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background:#E1306C; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:700; color:#ffffff; line-height:40px; display:block;">IG</span></td></tr></table>
+                          </a>
+                        </td>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.facebook.com/gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#1877F2; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:16px; font-weight:700; color:#ffffff; line-height:40px; display:block;">f</span></td></tr></table>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <a href="https://www.gracelifefellowship.org" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Website</a>
+                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">·</span>
+                    <a href="https://www.gracelifefellowship.org/media/main" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Sermons</a>
+                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">·</span>
+                    <a href="https://www.gracelifefellowship.org/events" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Events</a>
+                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">·</span>
+                    <a href="https://www.gracelifefellowship.org/give" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Give</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr><td style="height:24px; background-color:transparent;"></td></tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`;
+    }
+
+    function copyHTML() {
+      const html = buildHTML();
+      const btn = document.getElementById('copyBtn');
+
+      const done = () => {
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('success');
+        showToast('✅ HTML copied! Paste it into Elexio\'s code view.');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy HTML';
+          btn.classList.remove('success');
+        }, 3000);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(html).then(done).catch(() => fallbackCopy(html, done));
+      } else {
+        fallbackCopy(html, done);
+      }
+    }
+
+    function fallbackCopy(text, callback) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); callback(); } catch(e) { alert('Could not copy automatically. Use Cmd+A then Cmd+C in the box below:\n\n' + text.substring(0, 200) + '...'); }
+      document.body.removeChild(ta);
+    }
+
+    function downloadHTML() {
+      const html = buildHTML();
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const date = document.getElementById('email_date').value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
+      a.href = url;
+      a.download = 'GLF-Devotional-' + date + '.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('⬇ File downloaded!');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg || toast.textContent;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+  </script>
+
+</body>
+</html>
