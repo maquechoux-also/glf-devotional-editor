@@ -422,6 +422,36 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       resize();
     });
 
+    // Auto-convert straight " (inch mark) to curly “ ” based on context.
+    // Opening when preceded by start-of-string, whitespace, or opening bracket; otherwise closing.
+    function smartenQuotes(text) {
+      let out = '';
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          const prev = i > 0 ? text[i - 1] : '';
+          out += (prev === '' || /[\s(\[\{]/.test(prev)) ? '“' : '”';
+        } else {
+          out += ch;
+        }
+      }
+      return out;
+    }
+
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        const original = el.value;
+        const smart = smartenQuotes(original);
+        if (smart === original) return;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        el.value = smart;
+        try { el.setSelectionRange(start, end); } catch (e) { /* some inputs don't support selection */ }
+      });
+      // Smarten any pre-filled value on load
+      el.value = smartenQuotes(el.value);
+    });
+
     // Escape HTML special characters (for user-typed content)
     function esc(str) {
       return str
