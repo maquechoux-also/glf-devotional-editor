@@ -358,26 +358,41 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       </div>
     </div>
 
-    <!-- ── GIVE & SHARE CTAs ── -->
+    <!-- ── SHARE CTA ── -->
     <div class="form-section">
       <div class="section-header">
-        <div class="section-icon">🎁</div>
+        <div class="section-icon">📨</div>
         <div>
-          <h2>Give &amp; Share Buttons</h2>
-          <p>Bottom call-to-action buttons — usually don't change week to week</p>
+          <h2>Share Section</h2>
+          <p>Invites readers to forward the devotional to a friend</p>
         </div>
       </div>
       <div class="field">
         <label>Headline</label>
-        <input type="text" id="give_headline" value="Has this been a blessing to you?">
+        <input type="text" id="share_headline" value="Has this been a blessing to you?">
       </div>
       <div class="field">
         <label>Sub-text</label>
-        <textarea id="give_subtext" rows="2">Consider giving financially to support the ministry of Grace Life Fellowship.</textarea>
+        <textarea id="share_subtext" rows="2">Please share</textarea>
       </div>
       <div class="field">
         <label>Share Button Message <span class="hint">pre-fills the email body when a reader taps SHARE</span></label>
         <textarea id="share_body" rows="2">Hi! Thought you might enjoy this week's devotional from Grace Life.</textarea>
+      </div>
+    </div>
+
+    <!-- ── GIVE CTA ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">🎁</div>
+        <div>
+          <h2>Give Section</h2>
+          <p>Invites readers to give financially</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Sub-text</label>
+        <textarea id="give_subtext" rows="2">Please consider giving to support the ministry of GLF</textarea>
       </div>
     </div>
 
@@ -478,9 +493,10 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       const devotionalByline = val('devotional_byline');
       const bodyContent      = parseBodyContent();
       const closingPrayer    = val('closing_prayer');
-      const giveHeadline     = val('give_headline');
-      const giveSubtext      = val('give_subtext');
+      const shareHeadline    = val('share_headline');
+      const shareSubtext     = val('share_subtext');
       const shareBody        = encodeURIComponent(document.getElementById('share_body').value.trim());
+      const giveSubtext      = val('give_subtext');
 
       return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -577,33 +593,38 @@ So when you feel insignificant or rejected, come back to this truth: your value 
             </td>
           </tr>
 
-          <!-- GIVE CTA -->
+          <!-- SHARE CTA -->
           <tr>
-            <td style="background-color:#081158; padding: 32px 48px;" class="pad-mobile">
+            <td style="background-color:#0c1a6e; padding: 32px 48px;" class="pad-mobile">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td align="center">
-                    <p style="margin:0 0 6px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">${giveHeadline}</p>
-                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:#a8b5ce; line-height:22px;">${giveSubtext}</p>
+                    <p style="margin:0 0 6px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">${shareHeadline}</p>
+                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:#a8b5ce; line-height:22px;">${shareSubtext}</p>
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
                       <tr>
-                        <td style="padding: 0 6px;">
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                            <tr>
-                              <td style="border-radius:50px; border:1.5px solid #ec8675;">
-                                <a href="mailto:?subject=Weekly%20Devotional%20from%20Grace%20Life%20Fellowship&body=${shareBody}" style="display:inline-block; padding:12.5px 36px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ec8675; text-decoration:none; mso-padding-alt:14px 40px;">SHARE</a>
-                              </td>
-                            </tr>
-                          </table>
+                        <td style="border-radius:50px; border:1.5px solid #ec8675;">
+                          <a href="mailto:?subject=Weekly%20Devotional%20from%20Grace%20Life%20Fellowship&body=${shareBody}" style="display:inline-block; padding:12.5px 36px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ec8675; text-decoration:none; mso-padding-alt:14px 40px;">SHARE</a>
                         </td>
-                        <td style="padding: 0 6px;">
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                            <tr>
-                              <td style="border-radius:50px; background-color:#5532FA;">
-                                <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; mso-padding-alt:14px 40px;">GIVE</a>
-                              </td>
-                            </tr>
-                          </table>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- GIVE CTA -->
+          <tr>
+            <td style="background-color:#081158; padding: 28px 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 18px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:#a8b5ce; line-height:22px;">${giveSubtext}</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="border-radius:50px; background-color:#5532FA;">
+                          <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; mso-padding-alt:14px 40px;">GIVE</a>
                         </td>
                       </tr>
                     </table>
