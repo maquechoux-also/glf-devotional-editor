@@ -358,13 +358,13 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       </div>
     </div>
 
-    <!-- ── GIVE CTA ── -->
+    <!-- ── GIVE & SHARE CTAs ── -->
     <div class="form-section">
       <div class="section-header">
         <div class="section-icon">🎁</div>
         <div>
-          <h2>Give Section</h2>
-          <p>Giving call-to-action at the bottom — usually doesn't change week to week</p>
+          <h2>Give &amp; Share Buttons</h2>
+          <p>Bottom call-to-action buttons — usually don't change week to week</p>
         </div>
       </div>
       <div class="field">
@@ -374,6 +374,10 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       <div class="field">
         <label>Sub-text</label>
         <textarea id="give_subtext" rows="2">Consider giving financially to support the ministry of Grace Life Fellowship.</textarea>
+      </div>
+      <div class="field">
+        <label>Share Button Message <span class="hint">pre-fills the email body when a reader taps SHARE</span></label>
+        <textarea id="share_body" rows="2">Hi! Thought you might enjoy this week's devotional from Grace Life.</textarea>
       </div>
     </div>
 
@@ -476,6 +480,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       const closingPrayer    = val('closing_prayer');
       const giveHeadline     = val('give_headline');
       const giveSubtext      = val('give_subtext');
+      const shareBody        = encodeURIComponent(document.getElementById('share_body').value.trim());
 
       return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -585,8 +590,8 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                         <td style="padding: 0 6px;">
                           <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                             <tr>
-                              <td style="border-radius:50px; background-color:#5532FA;">
-                                <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; mso-padding-alt:14px 40px;">GIVE</a>
+                              <td style="border-radius:50px; border:1.5px solid #ec8675;">
+                                <a href="mailto:?subject=Weekly%20Devotional%20from%20Grace%20Life%20Fellowship&body=${shareBody}" style="display:inline-block; padding:12.5px 36px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ec8675; text-decoration:none; mso-padding-alt:14px 40px;">SHARE</a>
                               </td>
                             </tr>
                           </table>
@@ -594,8 +599,8 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                         <td style="padding: 0 6px;">
                           <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                             <tr>
-                              <td style="border-radius:50px; border:1.5px solid #ec8675;">
-                                <a href="mailto:?subject=Weekly%20Devotional%20from%20Grace%20Life%20Fellowship&body=Hi!%20Thought%20you%20might%20enjoy%20this%20week%27s%20devotional%20from%20Grace%20Life%20Fellowship.%20Read%20more%3A%20https%3A%2F%2Fwww.gracelifefellowship.org%2F" style="display:inline-block; padding:12.5px 36px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ec8675; text-decoration:none; mso-padding-alt:14px 40px;">SHARE</a>
+                              <td style="border-radius:50px; background-color:#5532FA;">
+                                <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; mso-padding-alt:14px 40px;">GIVE</a>
                               </td>
                             </tr>
                           </table>

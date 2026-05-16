@@ -100,6 +100,8 @@ const vars = {
   closingName:      val('closing_name'),
   giveHeadline:     val('give_headline'),
   giveSubtext:      val('give_subtext'),
+  // share_body goes into a mailto: URL, so it needs URL-encoding, not HTML-escaping
+  shareBody:        encodeURIComponent((values.share_body || '').trim()),
 };
 
 for (const k in vars) {
