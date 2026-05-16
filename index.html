@@ -372,11 +372,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
         <input type="text" id="share_headline" value="Has this been a blessing to you?">
       </div>
       <div class="field">
-        <label>Sub-text</label>
-        <textarea id="share_subtext" rows="2">Please share</textarea>
-      </div>
-      <div class="field">
-        <label>Share Button Message <span class="hint">pre-fills the email body when a reader taps SHARE</span></label>
+        <label>Share Button Message <span class="hint">pre-fills the email body when a reader taps PLEASE SHARE</span></label>
         <textarea id="share_body" rows="2">Hi! Thought you might enjoy this week's devotional from Grace Life.</textarea>
       </div>
     </div>
@@ -392,7 +388,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       </div>
       <div class="field">
         <label>Sub-text</label>
-        <textarea id="give_subtext" rows="2">Please consider giving to support the ministry of GLF</textarea>
+        <textarea id="give_subtext" rows="2">If you would like to help support the ministries of GLF, please consider giving</textarea>
       </div>
     </div>
 
@@ -494,7 +490,6 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       const bodyContent      = parseBodyContent();
       const closingPrayer    = val('closing_prayer');
       const shareHeadline    = val('share_headline');
-      const shareSubtext     = val('share_subtext');
       const shareBody        = encodeURIComponent(document.getElementById('share_body').value.trim());
       const giveSubtext      = val('give_subtext');
 
@@ -599,12 +594,11 @@ So when you feel insignificant or rejected, come back to this truth: your value 
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td align="center">
-                    <p style="margin:0 0 6px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">${shareHeadline}</p>
-                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:#a8b5ce; line-height:22px;">${shareSubtext}</p>
+                    <p style="margin:0 0 22px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">${shareHeadline}</p>
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
                       <tr>
                         <td style="border-radius:50px; border:1.5px solid #ec8675;">
-                          <a href="mailto:?subject=Weekly%20Devotional%20from%20Grace%20Life%20Fellowship&body=${shareBody}" style="display:inline-block; padding:12.5px 36px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ec8675; text-decoration:none; mso-padding-alt:14px 40px;">SHARE</a>
+                          <a href="mailto:?subject=Weekly%20Devotional%20from%20Grace%20Life%20Fellowship&body=${shareBody}" style="display:inline-block; padding:12.5px 28px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ec8675; text-decoration:none; mso-padding-alt:14px 40px;">PLEASE SHARE</a>
                         </td>
                       </tr>
                     </table>
