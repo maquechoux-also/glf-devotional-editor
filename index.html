@@ -343,29 +343,6 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       </div>
     </div>
 
-    <!-- ── REFLECT & RESPOND ── -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-icon">💬</div>
-        <div>
-          <h2>Reflect &amp; Respond</h2>
-          <p>Three discussion or personal reflection questions</p>
-        </div>
-      </div>
-      <div class="field">
-        <label>Question 1</label>
-        <textarea id="question_1" rows="2">What measuring stick have you been using to determine your own worth — performance, others' approval, or how you feel? How has that been affecting you?</textarea>
-      </div>
-      <div class="field">
-        <label>Question 2</label>
-        <textarea id="question_2" rows="2">In what areas of your life do you find it hardest to believe that your worth is "settled and unchanging" in God's eyes?</textarea>
-      </div>
-      <div class="field">
-        <label>Question 3</label>
-        <textarea id="question_3" rows="2">How might knowing your true worth change the way you treat yourself — and the way you share God's love with others this week?</textarea>
-      </div>
-    </div>
-
     <!-- ── CLOSING & PRAYER ── -->
     <div class="form-section">
       <div class="section-header">
@@ -506,9 +483,6 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       const devotionalTitle  = val('devotional_title');
       const devotionalByline = val('devotional_byline');
       const bodyContent      = parseBodyContent();
-      const q1               = val('question_1');
-      const q2               = val('question_2');
-      const q3               = val('question_3');
       const closingPrayer    = val('closing_prayer');
       const closingGreeting  = val('closing_greeting');
       const closingName      = val('closing_name');
@@ -578,7 +552,7 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                   <td>
                     <p style="margin:0 0 12px 0; font-family:'Inter',Arial,sans-serif; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#ec8675;">Scripture</p>
                     <p class="scripture-text" style="margin:0 0 16px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:24px; line-height:36px; font-weight:400; font-style:italic; color:#ffffff;">${scriptureText}</p>
-                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#8fa0be;">${scriptureRef}</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:8px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#8fa0be;">${scriptureRef}</p>
                   </td>
                 </tr>
               </table>
@@ -594,37 +568,6 @@ So when you feel insignificant or rejected, come back to this truth: your value 
                 <tr><td style="background-color:#d2e4e0; height:1px; font-size:1px; line-height:1px; mso-line-height-rule:exactly;">&nbsp;</td></tr>
               </table>
               ${bodyContent}
-            </td>
-          </tr>
-
-          <!-- REFLECT & RESPOND -->
-          <tr>
-            <td style="background-color:#d2e4e0; padding: 36px 48px;" class="pad-mobile">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr>
-                  <td>
-                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">Reflect &amp; Respond</p>
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:16px;">
-                      <tr>
-                        <td width="30" valign="top" style="padding-top:1px;"><div style="width:24px; height:24px; background-color:#081158; border-radius:50%; text-align:center; line-height:24px; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; color:#ffffff;">1</div></td>
-                        <td style="font-family:'Inter',Arial,sans-serif; font-size:15px; line-height:26px; color:#1a1a2e; padding-left:6px;">${q1}</td>
-                      </tr>
-                    </table>
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:16px;">
-                      <tr>
-                        <td width="30" valign="top" style="padding-top:1px;"><div style="width:24px; height:24px; background-color:#081158; border-radius:50%; text-align:center; line-height:24px; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; color:#ffffff;">2</div></td>
-                        <td style="font-family:'Inter',Arial,sans-serif; font-size:15px; line-height:26px; color:#1a1a2e; padding-left:6px;">${q2}</td>
-                      </tr>
-                    </table>
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                      <tr>
-                        <td width="30" valign="top" style="padding-top:1px;"><div style="width:24px; height:24px; background-color:#081158; border-radius:50%; text-align:center; line-height:24px; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:700; color:#ffffff;">3</div></td>
-                        <td style="font-family:'Inter',Arial,sans-serif; font-size:15px; line-height:26px; color:#1a1a2e; padding-left:6px;">${q3}</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
             </td>
           </tr>
 
