@@ -490,7 +490,10 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       const bodyContent      = parseBodyContent();
       const closingPrayer    = val('closing_prayer');
       const shareHeadline    = val('share_headline');
-      const shareBody        = encodeURIComponent(document.getElementById('share_body').value.trim());
+      // Gmail-web's mailto handler drops the body parameter when it contains characters
+      // encodeURIComponent leaves alone (notably ' ! ( ) *). Force RFC 3986 strict encoding.
+      const shareBody        = encodeURIComponent(document.getElementById('share_body').value.trim())
+                                 .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
       const giveSubtext      = val('give_subtext');
 
       return `<!DOCTYPE html>
