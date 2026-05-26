@@ -189,6 +189,10 @@
       background: white;
     }
 
+    /* Pre-filled (last-week) text shows lighter; first edit clears it back to normal */
+    .field input.is-default,
+    .field textarea.is-default { color: #9ba6bc; }
+
     .field-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -375,6 +379,10 @@ So when you feel insignificant or rejected, come back to this truth: your value 
         <label>Share Button Message <span class="hint">pre-fills the email body when a reader taps PLEASE SHARE</span></label>
         <textarea id="share_body" rows="2">Hi! Thought you might enjoy this week's devotional from Grace Life.</textarea>
       </div>
+      <div class="field">
+        <label>Blog Post URL <span class="hint">link to this week's devotional on the GLF website — included in the shared email</span></label>
+        <input type="text" id="blog_url" value="" placeholder="https://www.gracelifefellowship.org/blog/...">
+      </div>
     </div>
 
     <!-- ── GIVE CTA ── -->
@@ -422,6 +430,8 @@ So when you feel insignificant or rejected, come back to this truth: your value 
 
     document.querySelectorAll('input[type="text"], textarea').forEach(el => {
       el.addEventListener('input', () => {
+        // First user edit promotes the field from "last week's default" to fresh content
+        el.classList.remove('is-default');
         const original = el.value;
         const smart = smartenQuotes(original);
         if (smart === original) return;
@@ -432,6 +442,8 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       });
       // Smarten any pre-filled value on load
       el.value = smartenQuotes(el.value);
+      // Mark any non-empty pre-filled field as a last-week default (lighter text)
+      if (el.value.trim()) el.classList.add('is-default');
     });
 
     // Escape HTML special characters (for user-typed content)
@@ -490,9 +502,18 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       const bodyContent      = parseBodyContent();
       const closingPrayer    = val('closing_prayer');
       const shareHeadline    = val('share_headline');
+
+      // Build the plain-text mailto body: a short message + a link to the blog post
+      // (where the recipient can read the styled devotional with all links and buttons intact).
+      const raw = id => document.getElementById(id).value.trim();
+      const blogUrl = raw('blog_url');
+      const sharePlainText = blogUrl
+        ? raw('share_body') + '\n\nRead it here: ' + blogUrl
+        : raw('share_body');
+
       // Gmail-web's mailto handler drops the body parameter when it contains characters
       // encodeURIComponent leaves alone (notably ' ! ( ) *). Force RFC 3986 strict encoding.
-      const shareBody        = encodeURIComponent(document.getElementById('share_body').value.trim())
+      const shareBody        = encodeURIComponent(sharePlainText)
                                  .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
       const giveSubtext      = val('give_subtext');
 
