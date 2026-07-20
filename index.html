@@ -376,6 +376,7 @@
       <p>Fill in the fields below, then copy the HTML into Elexio</p>
     </div>
     <div class="header-actions">
+      <button class="btn-download" id="icsBtn" onclick="downloadICS()" style="display:none;" title="Calendar file of this week's events — attach it to the email so readers can save the dates">📅 Calendar (.ics)</button>
       <button class="btn-download" onclick="downloadHTML()">⬇ Download</button>
       <button class="btn-copy" onclick="copyHTML()" id="copyBtn">📋 Copy HTML</button>
     </div>
@@ -654,6 +655,8 @@ We'd love to see you there!</textarea>
       document.querySelectorAll('#tab-' + name + ' textarea').forEach(ta => {
         ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px';
       });
+      // The calendar file only makes sense for the events email
+      document.getElementById('icsBtn').style.display = name === 'weekly' ? '' : 'none';
       // Keep the tab in the URL so each email type is directly linkable/bookmarkable
       // (index.html#weekly opens straight to the events editor).
       history.replaceState(null, '', '#' + name);
@@ -678,20 +681,11 @@ We'd love to see you there!</textarea>
     };
     const THEME_ORDER = ['All Church', 'Life Groups', 'Kids', 'Middle School', 'High School', 'All Youth', 'Men', 'Women', 'Discipleship'];
 
-    // This week's example events — pre-filled as a starting point, same idea as the devotional.
+    // Starting-point event — the recurring Sunday service; add the rest each week.
     const SEED_EVENTS = [
       { theme: 'All Church', dow: 'Sunday', day: '12', month: 'July', group: 'All Church',
         title: 'Elective Hour & Worship Service',
-        body: "Join us for **9am Elective Hour** and the **10:15am Worship Service** as Pastor Tim Boswell continues the three-part series, *Traveler's Guide to Planet Earth*.\n\n**Kids Ministry** — childcare at 9am, kids' service at 10:15am (8 weeks – 5th grade).\n\n**Youth Ministry** — Bible study at 9am, youth service at 10:15am (6th – 12th graders)." },
-      { theme: 'Women', dow: 'Saturday', day: '11', month: 'July', group: "Women's",
-        title: "Women's Coffee Bar",
-        body: "All women are invited to a time of fellowship and coffee in the Grace Life Fellowship Foyer this Saturday, July 11, from 9 to 10:30am. We look forward to spending the morning together!" },
-      { theme: 'Middle School', dow: 'Sunday', day: '12', month: 'July', group: 'Middle School',
-        title: 'Middle School Camp Meeting',
-        body: "All parents/guardians with a middle school student attending camp next week are encouraged to attend a meeting in the Youth Room immediately following the 10:15am Service — final details plus time for any questions." },
-      { theme: 'High School', dow: 'Wednesday', day: '15', month: 'July', group: 'High School',
-        title: 'High School Hangout',
-        body: "All high school youth are invited to a hangout at the Jacoby's home — fellowship, games, and a cereal bar. No regular youth group next week while the middle school youth are away at camp." }
+        body: "Join us for **9am Elective Hour** and the **10:15am Worship Service** as Pastor Tim Boswell continues the three-part series, *Traveler's Guide to Planet Earth*.\n\n**Kids Ministry** — childcare at 9am, kids' service at 10:15am (8 weeks – 5th grade).\n\n**Youth Ministry** — Bible study at 9am, youth service at 10:15am (6th – 12th graders)." }
     ];
 
     // Seed announcement(s) — same starting-point idea as the events.
@@ -828,6 +822,85 @@ We'd love to see you there!</textarea>
       cardsInDateOrder(cards).forEach(c => wrap.appendChild(c));
       renderEventNumbers();
       showToast('✅ Events sorted — soonest first');
+    }
+
+    /* ── Calendar file (.ics) ── */
+    // Builds an iCalendar file of the events so recipients can save the dates to
+    // Apple/Google/Outlook calendars. Times aren't structured fields (they live in
+    // the body copy), so each event is an all-day entry with the details in the
+    // description. Events whose day/month can't be read are skipped with a warning.
+    function buildICS() {
+      const anchor = anchorDate();
+      const events = [];
+      let skipped = 0;
+      document.querySelectorAll('#weekly-events .event-card').forEach(card => {
+        const d = eventDateOf(card, anchor);
+        const title = card.querySelector('.ev-title').value.trim();
+        if (!d || !title) { skipped++; return; }
+        events.push({
+          d, title,
+          group: card.querySelector('.ev-group').value.trim(),
+          body: card.querySelector('.ev-body').value.trim()
+        });
+      });
+      events.sort((a, b) => a.d - b.d);
+
+      const pad = n => String(n).padStart(2, '0');
+      const ymd = d => '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+      // Escape per RFC 5545, and turn our markdown into plain text
+      const icsEsc = s => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+      const stripMd = s => s
+        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '$1 ($2)')
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1');
+      // Fold long lines at 74 chars (RFC 5545 continuation = CRLF + space)
+      const fold = line => {
+        let out = '';
+        while (line.length > 74) { out += line.slice(0, 74) + '\r\n '; line = line.slice(74); }
+        return out + line + '\r\n';
+      };
+      const now = new Date();
+      const dtstamp = now.getUTCFullYear() + pad(now.getUTCMonth() + 1) + pad(now.getUTCDate()) +
+        'T' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds()) + 'Z';
+
+      let ics = fold('BEGIN:VCALENDAR') + fold('VERSION:2.0') +
+        fold('PRODID:-//Grace Life Fellowship//Weekly News//EN') +
+        fold('CALSCALE:GREGORIAN') + fold('METHOD:PUBLISH') +
+        fold('X-WR-CALNAME:Grace Life Fellowship');
+      events.forEach(ev => {
+        const end = new Date(ev.d); end.setDate(end.getDate() + 1); // all-day DTEND is exclusive
+        const slug = ev.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+        // Prefix the group unless the title already says it (e.g. "High School Hangout")
+        const summary = (ev.group && !ev.title.toLowerCase().includes(ev.group.toLowerCase()))
+          ? ev.group + ': ' + ev.title : ev.title;
+        ics += fold('BEGIN:VEVENT') +
+          fold('UID:' + ymd(ev.d) + '-' + slug + '@gracelifefellowship.org') +
+          fold('DTSTAMP:' + dtstamp) +
+          fold('DTSTART;VALUE=DATE:' + ymd(ev.d)) +
+          fold('DTEND;VALUE=DATE:' + ymd(end)) +
+          fold('SUMMARY:' + icsEsc(summary)) +
+          (ev.body ? fold('DESCRIPTION:' + icsEsc(stripMd(ev.body))) : '') +
+          fold('URL:https://www.gracelifefellowship.org/events') +
+          fold('END:VEVENT');
+      });
+      ics += fold('END:VCALENDAR');
+      return { ics, count: events.length, skipped };
+    }
+
+    function downloadICS() {
+      const { ics, count, skipped } = buildICS();
+      if (!count) { showToast('⚠ No events with a readable date & title'); return; }
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const date = document.getElementById('w_weekof').value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
+      a.href = url;
+      a.download = 'GLF-Events-' + date + '.ics';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(skipped
+        ? '📅 Calendar saved — ' + skipped + ' event(s) skipped (unreadable date)'
+        : '📅 Calendar file saved — ' + count + ' event(s)');
     }
 
     /* ── Announcement cards (repeatable, may be zero) ── */
