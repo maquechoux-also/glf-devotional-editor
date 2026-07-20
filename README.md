@@ -55,6 +55,10 @@ npx serve -l 8765 .
   from the Week Of date, so Dec→Jan weeks sort correctly). If any event's day/month
   can't be read, the email keeps the manual card order instead of guessing. The
   **⇅ Sort by Date** button reorders the cards themselves the same way.
+- **📅 Calendar (.ics)** (Weekly News tab only) downloads an iCalendar file of the
+  events — attach it to the Elexio email so readers can save the dates to Apple,
+  Google, or Outlook calendars. Events are all-day entries (times stay in the
+  description text); events with an unreadable date are skipped with a warning.
 - Image assets are hosted on the GLF Webflow CDN (`cdn.prod.website-files.com/…`) —
   don't delete the `glf-email-*` assets in Webflow; sent emails reference them
   forever.
