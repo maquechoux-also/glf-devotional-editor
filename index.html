@@ -239,6 +239,127 @@
       color: var(--purple);
     }
 
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      background: white;
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 6px rgba(8,17,88,0.07);
+    }
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 16px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      letter-spacing: 0.3px;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: var(--navy); }
+    .tab-btn.active { background: var(--navy); color: white; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Event cards (Weekly Events tab) ── */
+    .field select {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #dde6f0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fafcff;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .field select:focus { outline: none; border-color: var(--light-blue); background: white; }
+
+    .event-card {
+      border: 1.5px solid #e3ebf5;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      background: #fafcff;
+    }
+    .ev-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .ev-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .btn-remove {
+      background: transparent;
+      border: 1.5px solid #e3b7b0;
+      color: #c0655a;
+      border-radius: 7px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s;
+      font-family: inherit;
+    }
+    .btn-remove:hover { background: #fbeae6; }
+    .btn-add {
+      width: 100%;
+      background: #f0f4ff;
+      border: 1.5px dashed #b9c8ec;
+      color: var(--navy);
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      font-family: inherit;
+    }
+    .btn-add:hover { background: #e5ecff; border-color: var(--light-blue); }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-row .btn-add { flex: 1; }
+    .ev-theme-row { display: flex; align-items: center; gap: 10px; }
+
+    /* Floating "Add Link" chip — appears when text is selected in a link-enabled box */
+    .link-btn {
+      position: fixed;
+      z-index: 300;
+      display: none;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .link-btn.show { display: block; }
+    .link-btn:hover { background: var(--mid-navy); }
+    .ev-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(0,0,0,0.08);
+    }
+
     @media (max-width: 600px) {
       .field-grid { grid-template-columns: 1fr; }
       .site-header { flex-direction: column; gap: 12px; text-align: center; }
@@ -251,7 +372,7 @@
   <!-- Sticky Header -->
   <header class="site-header">
     <div class="brand">
-      <h1>✦ GLF Weekly Devotional Editor</h1>
+      <h1>✦ GLF Email Editor</h1>
       <p>Fill in the fields below, then copy the HTML into Elexio</p>
     </div>
     <div class="header-actions">
@@ -261,6 +382,15 @@
   </header>
 
   <div class="main">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabbtn-devotional" onclick="switchTab('devotional')">✦ Weekly Devotional</button>
+      <button class="tab-btn" id="tabbtn-weekly" onclick="switchTab('weekly')">📅 Weekly News</button>
+    </div>
+
+    <!-- ═══════════════ DEVOTIONAL TAB ═══════════════ -->
+    <div id="tab-devotional" class="tab-panel active">
 
     <div class="tip">
       <strong>How to use:</strong> Each field is pre-filled with last week's content as a starting point — just update whatever's changing this week. When you're done, click <strong>Copy HTML</strong> in the header, then paste into Elexio's code view. That's it!
@@ -400,18 +530,79 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       </div>
     </div>
 
+    </div><!-- /#tab-devotional -->
+
+
+    <!-- ═══════════════ WEEKLY EVENTS TAB ═══════════════ -->
+    <div id="tab-weekly" class="tab-panel">
+
+      <div class="tip">
+        <strong>How to use:</strong> Update this week's date and intro, then edit the event cards below — pick a color theme for each, fill in the date and details, and use <strong>+ Add Event</strong> / <strong>Remove</strong> to match this week's schedule. Finish with the Announcement panel (or leave it blank to skip it), then click <strong>Copy HTML</strong> in the header and paste into Elexio's code view.
+      </div>
+
+      <!-- ── INTRO ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">📅</div>
+          <div>
+            <h2>Intro</h2>
+            <p>The date line and welcome sentence at the top of the card</p>
+          </div>
+        </div>
+        <div class="field">
+          <label>Week Of <span class="hint">e.g. Week of July 12, 2026</span></label>
+          <input type="text" id="w_weekof" value="Week of July 12, 2026">
+        </div>
+        <div class="field">
+          <label>Intro Sentence <span class="hint">press Enter for a line break</span></label>
+          <textarea id="w_intro" class="allow-links" rows="2">Here's what's happening at Grace Life Fellowship.
+We'd love to see you there!</textarea>
+        </div>
+        <div class="field">
+          <label>Preview Text <span class="hint">short teaser shown in the inbox before someone opens the email</span></label>
+          <input type="text" id="w_preheader" value="Here's what's happening at GLF">
+        </div>
+      </div>
+
+      <!-- ── EVENTS ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">🗓️</div>
+          <div>
+            <h2>Events</h2>
+            <p>One card per event — pick a color theme, set the date, and write the details. Events are automatically ordered soonest-first when the email is built.</p>
+          </div>
+        </div>
+        <div class="pull-quote-tip">
+          In any text box below: wrap words in <code>**double asterisks**</code> for <strong>bold navy</strong> emphasis, or <code>*single asterisks*</code> for <em>italics</em>. To <strong>link to a webpage</strong>, highlight the words and click the <strong>🔗 Add Link</strong> button that pops up (or type <code>[words](https://page)</code>). Separate paragraphs with a blank line — the first paragraph is slightly larger, the rest are compact sub-lines.
+        </div>
+        <div id="weekly-events"></div>
+        <div class="btn-row">
+          <button class="btn-add" onclick="addEvent()">+ Add Event</button>
+          <button class="btn-add" onclick="sortEvents()" title="Reorder the cards soonest-first">⇅ Sort by Date</button>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">📣</div>
+          <div>
+            <h2>Announcements</h2>
+            <p>Flexible panels below the events — missions updates, special notices, anything that isn't a calendar event. Add as many as you need, or remove them all to skip the section.</p>
+          </div>
+        </div>
+        <div id="weekly-announcements"></div>
+        <button class="btn-add" onclick="addAnnouncement()">+ Add Announcement</button>
+      </div>
+
+    </div><!-- /#tab-weekly -->
+
   </div><!-- /.main -->
 
   <div class="toast" id="toast">✅ HTML copied! Now paste it into Elexio's code view.</div>
 
   <script>
-    // Auto-resize all textareas on input
-    document.querySelectorAll('textarea').forEach(ta => {
-      function resize() { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; }
-      ta.addEventListener('input', resize);
-      resize();
-    });
-
     // Auto-convert straight " (inch mark) to curly “ ” based on context.
     // Opening when preceded by start-of-string, whitespace, or opening bracket; otherwise closing.
     function smartenQuotes(text) {
@@ -428,9 +619,18 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       return out;
     }
 
-    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+    // Wire a single input/textarea: auto-resize (textarea), smart quotes on load + on
+    // input, and the "lighter text until first edit" last-week-default treatment.
+    // Called both for the static fields on load and for dynamically added event cards.
+    function initField(el) {
+      if (el.tagName === 'TEXTAREA') {
+        const resize = () => { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; };
+        el.addEventListener('input', resize);
+        resize();
+      }
+      el.value = smartenQuotes(el.value);
+      if (el.value.trim()) el.classList.add('is-default');
       el.addEventListener('input', () => {
-        // First user edit promotes the field from "last week's default" to fresh content
         el.classList.remove('is-default');
         const original = el.value;
         const smart = smartenQuotes(original);
@@ -440,11 +640,592 @@ So when you feel insignificant or rejected, come back to this truth: your value 
         el.value = smart;
         try { el.setSelectionRange(start, end); } catch (e) { /* some inputs don't support selection */ }
       });
-      // Smarten any pre-filled value on load
-      el.value = smartenQuotes(el.value);
-      // Mark any non-empty pre-filled field as a last-week default (lighter text)
-      if (el.value.trim()) el.classList.add('is-default');
-    });
+    }
+
+    /* ══════════════════ TABS ══════════════════ */
+    let activeTab = 'devotional';
+    function switchTab(name) {
+      activeTab = name;
+      ['devotional', 'weekly'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('active', t === name);
+        document.getElementById('tabbtn-' + t).classList.toggle('active', t === name);
+      });
+      // Textareas that were hidden report scrollHeight 0; resize them now they're visible.
+      document.querySelectorAll('#tab-' + name + ' textarea').forEach(ta => {
+        ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px';
+      });
+      // Keep the tab in the URL so each email type is directly linkable/bookmarkable
+      // (index.html#weekly opens straight to the events editor).
+      history.replaceState(null, '', '#' + name);
+    }
+
+    /* ══════════════════ WEEKLY EVENTS ══════════════════ */
+    // Ministry color pairings. The five new ones are pulled from the site's Connect
+    // page (gracelifefellowship.org/connect/connect), where each ministry card uses a
+    // solid accent + a 15% tint of it — same accent/tile structure as the email tiles.
+    // onAccent = text color on the accent (navy on light accents, white on dark).
+    // label = what the group pill auto-fills to when the theme is picked.
+    const THEMES = {
+      'All Church':    { tile: '#f6ecdc', accent: '#eac18b', onAccent: '#081158', label: 'All Church' },
+      'Life Groups':   { tile: '#f0ecfd', accent: '#6157f8', onAccent: '#ffffff', label: 'Life Groups' },
+      'Kids':          { tile: '#fef4e4', accent: '#faa421', onAccent: '#081158', label: 'Kids' },
+      'Middle School': { tile: '#faeae5', accent: '#ec8675', onAccent: '#081158', label: 'Middle School' },
+      'High School':   { tile: '#e4edf7', accent: '#5b95d2', onAccent: '#ffffff', label: 'High School' },
+      'All Youth':     { tile: '#e9efd9', accent: '#6d9400', onAccent: '#ffffff', label: 'Youth' },
+      'Men':           { tile: '#dadbe6', accent: '#081158', onAccent: '#ffffff', label: 'Men' },
+      'Women':         { tile: '#e6f0ed', accent: '#d2e4e0', onAccent: '#081158', label: 'Women' },
+      'Discipleship':  { tile: '#d9f1f6', accent: '#00a1c1', onAccent: '#ffffff', label: 'Discipleship' }
+    };
+    const THEME_ORDER = ['All Church', 'Life Groups', 'Kids', 'Middle School', 'High School', 'All Youth', 'Men', 'Women', 'Discipleship'];
+
+    // This week's example events — pre-filled as a starting point, same idea as the devotional.
+    const SEED_EVENTS = [
+      { theme: 'All Church', dow: 'Sunday', day: '12', month: 'July', group: 'All Church',
+        title: 'Elective Hour & Worship Service',
+        body: "Join us for **9am Elective Hour** and the **10:15am Worship Service** as Pastor Tim Boswell continues the three-part series, *Traveler's Guide to Planet Earth*.\n\n**Kids Ministry** — childcare at 9am, kids' service at 10:15am (8 weeks – 5th grade).\n\n**Youth Ministry** — Bible study at 9am, youth service at 10:15am (6th – 12th graders)." },
+      { theme: 'Women', dow: 'Saturday', day: '11', month: 'July', group: "Women's",
+        title: "Women's Coffee Bar",
+        body: "All women are invited to a time of fellowship and coffee in the Grace Life Fellowship Foyer this Saturday, July 11, from 9 to 10:30am. We look forward to spending the morning together!" },
+      { theme: 'Middle School', dow: 'Sunday', day: '12', month: 'July', group: 'Middle School',
+        title: 'Middle School Camp Meeting',
+        body: "All parents/guardians with a middle school student attending camp next week are encouraged to attend a meeting in the Youth Room immediately following the 10:15am Service — final details plus time for any questions." },
+      { theme: 'High School', dow: 'Wednesday', day: '15', month: 'July', group: 'High School',
+        title: 'High School Hangout',
+        body: "All high school youth are invited to a hangout at the Jacoby's home — fellowship, games, and a cereal bar. No regular youth group next week while the middle school youth are away at camp." }
+    ];
+
+    // Seed announcement(s) — same starting-point idea as the events.
+    const ANN_SEED = [
+      { eyebrow: 'Missions Update', headline: 'Hope for Croatia',
+        body: "Hope for Croatia is dedicated to bringing Biblical ideals to the secular society of Croatia — living hope to people in need, the saving love of Christ to those open to the Gospel, and His victorious Life to all who believe in Him. This mission is fulfilled through counseling, training, publishing, foster care ministries, Christian art, and the local church.",
+        quote: "Please pray for God's blessing on their upcoming Christian camp, for the continued miraculous healing of their foster daughter Mauricia, and that the Lord will open more room and bring living fruit to their various ministries." }
+    ];
+
+    // Escape for use inside a double-quoted HTML attribute value.
+    function attrEsc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+    // Escape for use as textarea/element text content.
+    function textEsc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function eventCardEl(d) {
+      const div = document.createElement('div');
+      div.className = 'event-card';
+      const opts = THEME_ORDER.map(t =>
+        `<option value="${attrEsc(t)}"${t === d.theme ? ' selected' : ''}>${textEsc(t)}</option>`).join('');
+      div.innerHTML = `
+        <div class="ev-head">
+          <span class="ev-num"></span>
+          <button class="btn-remove" onclick="removeEvent(this)">✕ Remove</button>
+        </div>
+        <div class="field">
+          <label>Color Theme</label>
+          <div class="ev-theme-row">
+            <span class="ev-swatch" style="background:${THEMES[d.theme].accent}"></span>
+            <select class="ev-theme" onchange="onThemeChange(this)">${opts}</select>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label>Day of Week</label><input type="text" class="ev-dow" value="${attrEsc(d.dow)}"></div>
+          <div class="field"><label>Group Label <span class="hint">auto-fills from the color theme</span></label><input type="text" class="ev-group" value="${attrEsc(d.group)}"></div>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label>Day Number</label><input type="text" class="ev-day" value="${attrEsc(d.day)}"></div>
+          <div class="field"><label>Month</label><input type="text" class="ev-month" value="${attrEsc(d.month)}"></div>
+        </div>
+        <div class="field"><label>Event Title</label><input type="text" class="ev-title" value="${attrEsc(d.title)}"></div>
+        <div class="field"><label>Details</label><textarea class="ev-body allow-links" rows="4">${textEsc(d.body)}</textarea></div>`;
+      return div;
+    }
+
+    function onThemeChange(sel) {
+      const T = THEMES[sel.value];
+      sel.closest('.ev-theme-row').querySelector('.ev-swatch').style.background = T.accent;
+      // Picking a theme auto-fills the group pill to match (e.g. All Youth → "Youth");
+      // the client can still type over it afterward for a custom label.
+      const groupInput = sel.closest('.event-card').querySelector('.ev-group');
+      groupInput.value = T.label;
+      groupInput.classList.remove('is-default');
+    }
+
+    function renderEventNumbers() {
+      document.querySelectorAll('#weekly-events .event-card').forEach((c, i) => {
+        c.querySelector('.ev-num').textContent = 'Event ' + (i + 1);
+      });
+    }
+
+    function addEvent() {
+      const el = eventCardEl({ theme: 'All Church', dow: '', day: '', month: '', group: 'All Church', title: '', body: '' });
+      document.getElementById('weekly-events').appendChild(el);
+      el.querySelectorAll('input, textarea').forEach(initField);
+      renderEventNumbers();
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function removeEvent(btn) {
+      if (document.querySelectorAll('#weekly-events .event-card').length <= 1) {
+        showToast('⚠ Keep at least one event');
+        return;
+      }
+      btn.closest('.event-card').remove();
+      renderEventNumbers();
+    }
+
+    /* ── Date sorting (soonest first) ── */
+    const MONTHS = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+    function parseMonth(s) {
+      const k = (s || '').trim().toLowerCase().slice(0, 3);
+      return Object.prototype.hasOwnProperty.call(MONTHS, k) ? MONTHS[k] : null;
+    }
+    // Anchor = the "Week Of" date; used to pin each event's year (so a Dec 30 /
+    // Jan 2 week still sorts correctly across the year boundary).
+    function anchorDate() {
+      const t = document.getElementById('w_weekof').value;
+      const m = t.match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{4})/);
+      if (m) {
+        const mo = parseMonth(m[1]);
+        if (mo !== null) return new Date(+m[3], mo, +m[2]);
+      }
+      const y = t.match(/(\d{4})/);
+      return y ? new Date(+y[1], 6, 1) : new Date();
+    }
+    // Event card → Date, or null if the day/month can't be read.
+    // Year = whichever candidate lands closest to the anchor.
+    function eventDateOf(card, anchor) {
+      const mo = parseMonth(card.querySelector('.ev-month').value);
+      const day = parseInt(card.querySelector('.ev-day').value, 10);
+      if (mo === null || isNaN(day) || day < 1 || day > 31) return null;
+      let best = null;
+      for (const y of [anchor.getFullYear() - 1, anchor.getFullYear(), anchor.getFullYear() + 1]) {
+        const cand = new Date(y, mo, day);
+        if (best === null || Math.abs(cand - anchor) < Math.abs(best - anchor)) best = cand;
+      }
+      return best;
+    }
+    // Cards in soonest-first order — falls back to manual order unless EVERY
+    // event's date parses (a typo'd month must never silently scramble the email).
+    // Same-day events keep their manual order.
+    function cardsInDateOrder(cards) {
+      const anchor = anchorDate();
+      const dated = cards.map((c, i) => ({ c, i, d: eventDateOf(c, anchor) }));
+      if (!dated.every(x => x.d)) return null;
+      dated.sort((a, b) => (a.d - b.d) || (a.i - b.i));
+      return dated.map(x => x.c);
+    }
+    // The "⇅ Sort by Date" button — physically reorders the cards so what you see
+    // matches what the email will do.
+    function sortEvents() {
+      const wrap = document.getElementById('weekly-events');
+      const cards = [...wrap.querySelectorAll('.event-card')];
+      const anchor = anchorDate();
+      const bad = cards.findIndex(c => !eventDateOf(c, anchor));
+      if (bad !== -1) {
+        showToast('⚠ Check the day number & month on Event ' + (bad + 1));
+        return;
+      }
+      cardsInDateOrder(cards).forEach(c => wrap.appendChild(c));
+      renderEventNumbers();
+      showToast('✅ Events sorted — soonest first');
+    }
+
+    /* ── Announcement cards (repeatable, may be zero) ── */
+    function announcementCardEl(d) {
+      const div = document.createElement('div');
+      div.className = 'event-card announce-card';
+      div.innerHTML = `
+        <div class="ev-head">
+          <span class="ev-num"></span>
+          <button class="btn-remove" onclick="removeAnnouncement(this)">✕ Remove</button>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label>Eyebrow Label <span class="hint">e.g. Missions Update · Save the Date</span></label><input type="text" class="an-eyebrow" value="${attrEsc(d.eyebrow)}"></div>
+          <div class="field"><label>Headline</label><input type="text" class="an-headline" value="${attrEsc(d.headline)}"></div>
+        </div>
+        <div class="field"><label>Body</label><textarea class="an-body allow-links" rows="4">${textEsc(d.body)}</textarea></div>
+        <div class="field"><label>Highlight Quote <span class="hint">optional — the gold-rule italic quote; leave blank to omit</span></label><textarea class="an-quote allow-links" rows="3">${textEsc(d.quote)}</textarea></div>`;
+      return div;
+    }
+
+    function renderAnnouncementNumbers() {
+      document.querySelectorAll('#weekly-announcements .announce-card').forEach((c, i) => {
+        c.querySelector('.ev-num').textContent = 'Announcement ' + (i + 1);
+      });
+    }
+
+    function addAnnouncement() {
+      const el = announcementCardEl({ eyebrow: '', headline: '', body: '', quote: '' });
+      document.getElementById('weekly-announcements').appendChild(el);
+      el.querySelectorAll('input, textarea').forEach(initField);
+      renderAnnouncementNumbers();
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function removeAnnouncement(btn) {
+      btn.closest('.announce-card').remove();
+      renderAnnouncementNumbers();
+    }
+
+    function initWeekly() {
+      const c = document.getElementById('weekly-events');
+      SEED_EVENTS.forEach(d => {
+        const el = eventCardEl(d);
+        c.appendChild(el);
+        el.querySelectorAll('input, textarea').forEach(initField);
+      });
+      renderEventNumbers();
+      const a = document.getElementById('weekly-announcements');
+      ANN_SEED.forEach(d => {
+        const el = announcementCardEl(d);
+        a.appendChild(el);
+        el.querySelectorAll('input, textarea').forEach(initField);
+      });
+      renderAnnouncementNumbers();
+    }
+
+    // Inline formatting for body copy: [words](https://page) → sky-blue link,
+    // **bold** → navy strong, *italic* → em, single newlines → <br>.
+    // HTML-escape first so user text can't inject markup.
+    function formatInline(s) {
+      let out = esc(s);
+      out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
+        url = url.replace(/"/g, '%22');
+        if (!/^(https?:\/\/|mailto:)/i.test(url)) url = 'https://' + url;
+        return '<a href="' + url + '" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">' + text + '</a>';
+      });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#081158;">$1</strong>');
+      out = out.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      out = out.replace(/\n/g, '<br>');
+      return out;
+    }
+
+    // Event details → paragraphs. First paragraph is the 14px lead; the rest are
+    // compact 13px sub-lines, matching the design's primary/secondary text sizes.
+    function eventBody(raw) {
+      const blocks = raw.trim().split(/\n[ \t]*\n/).map(b => b.trim()).filter(Boolean);
+      return blocks.map((b, i) => {
+        const last = i === blocks.length - 1;
+        const mb = last ? '0' : (i === 0 ? '12px' : '6px');
+        const fs = i === 0 ? '14px' : '13px';
+        const lh = i === 0 ? '23px' : '20px';
+        return `
+                          <p style="margin:0 0 ${mb} 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:${fs}; line-height:${lh}; color:#1a1a2e;">${formatInline(b)}</p>`;
+      }).join('');
+    }
+
+    function renderEventTiles() {
+      let cards = [...document.querySelectorAll('#weekly-events .event-card')];
+      // Auto-sort soonest-first (only when every date parses cleanly)
+      cards = cardsInDateOrder(cards) || cards;
+      return cards.map((card, i) => {
+        const g = cls => card.querySelector('.' + cls).value.trim();
+        const T = THEMES[card.querySelector('.ev-theme').value] || THEMES['All Church'];
+        const dateText = T.onAccent;
+        const dow = esc(g('ev-dow')), day = esc(g('ev-day')), month = esc(g('ev-month'));
+        const group = esc(g('ev-group')), title = esc(g('ev-title'));
+        const body = eventBody(card.querySelector('.ev-body').value);
+        const tile = `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-radius:12px;">
+                <tr>
+                  <td class="date-col" width="104" bgcolor="${T.accent}" align="center" valign="middle" style="width:104px; background-color:${T.accent}; border-radius:12px 0 0 12px; padding:22px 0; text-align:center;">
+                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${dow}</p>
+                    <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:${dateText};">${day}</p>
+                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${month}</p>
+                  </td>
+                  <td class="tile-pad" bgcolor="${T.tile}" valign="top" style="background-color:${T.tile}; border-radius:0 12px 12px 0; padding:22px 26px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="margin-bottom:10px;">
+                      <tr><td bgcolor="${T.accent}" style="background-color:${T.accent}; border-radius:50px; padding:4px 12px; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:${dateText};">${group}</td></tr>
+                    </table>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td>
+                          <h2 style="margin:0 0 8px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:19px; line-height:24px; font-weight:800; color:#081158;">${title}</h2>${body}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>`;
+        const spacer = i < cards.length - 1 ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="height:22px; font-size:0; line-height:0;">&nbsp;</td></tr></table>` : '';
+        return tile + spacer;
+      }).join('');
+    }
+
+    // One announcement's inner content (no box of its own — the section shares one
+    // rounded box). All arguments arrive already escaped/formatted. Every line is
+    // optional; empty lines are skipped and the last one drops its bottom margin.
+    // Returns '' when the whole announcement is blank.
+    function announceBox(eyebrow, headline, body, quote) {
+      if (!eyebrow && !headline && !body && !quote) return '';
+      let inner = '';
+      if (eyebrow) inner += `
+                    <p style="margin:0 0 ${(headline || body || quote) ? '10px' : '0'} 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">${eyebrow}</p>`;
+      if (headline) inner += `
+                    <h3 style="margin:0 0 ${(body || quote) ? '12px' : '0'} 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; font-weight:800; color:#081158;">${headline}</h3>`;
+      if (body) inner += `
+                    <p style="margin:0 0 ${quote ? '16px' : '0'} 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:24px; color:#1a1a2e;">${body}</p>`;
+      if (quote) inner += `
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td width="4" valign="top" style="width:4px; min-width:4px; background-color:#eac18b; border-radius:3px; font-size:0; line-height:0;">&nbsp;</td>
+                        <td width="18" style="width:18px; font-size:0; line-height:0;">&nbsp;</td>
+                        <td valign="top">
+                          <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:15px; line-height:25px; font-style:italic; color:#081158;">${quote}</p>
+                        </td>
+                      </tr>
+                    </table>`;
+      return inner;
+    }
+
+    // All announcements share ONE rounded box, divided by hairline rules.
+    // Zero cards (or all blank) → the section is omitted; a small white spacer keeps
+    // the card bottom breathing.
+    function renderAnnouncements() {
+      const blocks = [...document.querySelectorAll('#weekly-announcements .announce-card')].map(card => {
+        const g = cls => card.querySelector('.' + cls).value.trim();
+        return announceBox(
+          esc(g('an-eyebrow')),
+          esc(g('an-headline')),
+          formatInline(g('an-body')),
+          formatInline(g('an-quote'))
+        );
+      }).filter(Boolean);
+      if (!blocks.length) {
+        return `
+          <!-- (announcements omitted — no content) -->
+          <tr><td style="background-color:#ffffff; height:32px; font-size:0; line-height:0;">&nbsp;</td></tr>`;
+      }
+      const divider = `
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;">
+                      <tr><td style="background-color:#c5d3f0; height:1px; font-size:1px; line-height:1px; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>`;
+      return `
+          <!-- ANNOUNCEMENTS PANEL -->
+          <tr>
+            <td style="background-color:#ffffff; padding: 34px 40px 40px 40px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td bgcolor="#eef3f8" class="tile-pad" style="background-color:#eef3f8; border:1.5px solid #c5d3f0; border-radius:12px; padding:28px 32px;">${blocks.join(divider)}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
+    }
+
+    function buildWeeklyHTML() {
+      const rawv = id => document.getElementById(id).value;
+      const preheader = val('w_preheader');
+      const weekof    = val('w_weekof');
+      const intro     = formatInline(rawv('w_intro').trim());
+      const tiles     = renderEventTiles();
+      const announcePanel = renderAnnouncements();
+
+      const LOGO = 'https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a025f4f152c26a0f09c8a73_GLF_white_bug.png';
+      const RIBBON = 'https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a5e8909fb50a451444256a6_glf-email-bookmark-ribbon.png';
+      const WORDMARK = 'https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a5e8909fb50a451444256ce_glf-email-wordmark-white.png';
+
+      return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <title>Grace Life Fellowship — Weekly News</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+  <style type="text/css">
+    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800,900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap');
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Satoshi', 'Segoe UI', Arial, Helvetica, sans-serif; background-color: #081158; color: #1a1a2e; }
+    .email-container { width: 100% !important; max-width: 600px !important; }
+    /* Constrain ONLY Elexio's auto-appended unsubscribe paragraph (matched by the link it contains) */
+    p:has(a[href*="email_unsubscribe"]) {
+      max-width: 600px !important;
+      margin: 8px auto 24px !important;
+      padding: 0 24px !important;
+      text-align: center !important;
+      font-family: 'Inter', Arial, Helvetica, sans-serif !important;
+      box-sizing: border-box;
+    }
+    a[href*="email_unsubscribe"] {
+      display: inline-block !important;
+      max-width: 100% !important;
+      color: #8fa0be !important;
+      font-size: 11px !important;
+      line-height: 18px !important;
+      word-break: break-word !important;
+    }
+    @media screen and (max-width: 620px) {
+      .fluid { max-width: 100% !important; height: auto !important; }
+      .pad-mobile { padding-left: 24px !important; padding-right: 24px !important; }
+      .tile-pad   { padding-left: 18px !important; padding-right: 18px !important; }
+      .date-col   { width: 84px !important; }
+      .date-num   { font-size: 36px !important; }
+      .page-title { font-size: 32px !important; }
+      .logo-mark  { width: 64px !important; }
+    }
+  </style>
+</head>
+<body width="100%" style="margin:0; padding:0; background-color:#081158;">
+
+  <div style="display:none; max-height:0px; overflow:hidden;">${preheader}&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌</div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#081158;">
+    <tr>
+      <td align="center" valign="top" style="padding: 28px 12px;">
+        <!--[if mso]>
+        <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td>
+        <![endif]-->
+        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; max-width:600px; margin:0 auto;">
+
+          <!-- HEADER (logo + title on the navy shell) -->
+          <tr>
+            <td style="padding: 16px 4px 34px 4px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td width="88" valign="middle" style="width:88px;">
+                    <img src="${LOGO}" alt="Grace Life Fellowship" width="88" class="logo-mark" style="width:88px; height:auto; display:block; border:0; outline:none; text-decoration:none;">
+                  </td>
+                  <td width="24" style="width:24px; font-size:0; line-height:0;">&nbsp;</td>
+                  <td valign="middle">
+                    <h1 class="page-title" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:42px; line-height:1.05; font-weight:700; color:#ffffff; letter-spacing:-0.5px;">Weekly News</h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- INTRO -->
+          <tr>
+            <td style="background-color:#ffffff; border-radius:12px 12px 0 0; padding: 0 48px 0 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="left" height="47" style="height:47px; font-size:0; line-height:0;">
+                    <img src="${RIBBON}" alt="" width="26" height="48" style="width:26px; height:48px; display:block; border:0; outline:none; text-decoration:none;">
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="height:22px; font-size:0; line-height:0;">&nbsp;</td></tr></table>
+              <p style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:#ec8675;">${weekof}</p>
+              <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:15px; line-height:25px; color:#1a1a2e;">${intro}</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="60" align="left" style="margin-top:26px;">
+                <tr><td style="background-color:#ec8675; height:3px; border-radius:2px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- EVENT TILES -->
+          <tr>
+            <td style="background-color:#ffffff; padding: 36px 40px 8px 40px;" class="pad-mobile">${tiles}
+            </td>
+          </tr>
+
+${announcePanel}
+
+          <!-- GIVING BAND -->
+          <tr>
+            <td bgcolor="#081158" style="background-color:#081158; padding: 32px 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; line-height:22px; color:#a8b5ce;">Consider giving financially to support the ministry of Grace Life Fellowship.</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="border:1.5px solid #5b95d2; border-radius:50px;">
+                          <a href="https://www.gracelifefellowship.org" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#5b95d2; text-decoration:none; border-radius:50px; mso-padding-alt:14px 40px;">SHARE</a>
+                        </td>
+                        <td width="12" style="width:12px; font-size:0; line-height:0;">&nbsp;</td>
+                        <td bgcolor="#5532FA" style="background-color:#5532FA; border-radius:50px;">
+                          <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; border-radius:50px; mso-padding-alt:14px 40px;">GIVE</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td bgcolor="#050d3d" style="background-color:#050d3d; border-radius:0 0 12px 12px; padding: 32px 48px 36px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom:14px;">
+                    <img src="${WORDMARK}" alt="Grace Life Fellowship" width="220" class="fluid" style="width:220px; height:auto; display:block; margin:0 auto; border:0; outline:none; text-decoration:none;">
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="40" align="center">
+                      <tr><td style="background-color:#ec8675; height:2px; border-radius:1px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:20px;">
+                    <p style="margin:0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;&middot;&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.youtube.com/@gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#FF0000; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:16px; font-weight:700; color:#ffffff; line-height:40px; display:block;">&#9654;</span></td></tr></table>
+                          </a>
+                        </td>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.instagram.com/gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background:#E1306C; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:700; color:#ffffff; line-height:40px; display:block;">IG</span></td></tr></table>
+                          </a>
+                        </td>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.facebook.com/gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#1877F2; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:16px; font-weight:700; color:#ffffff; line-height:40px; display:block;">f</span></td></tr></table>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <a href="https://www.gracelifefellowship.org" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Website</a>
+                    <span style="color:#4a5a75; font-size:12px;">&middot;</span>
+                    <a href="https://www.gracelifefellowship.org/media/main" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Sermons</a>
+                    <span style="color:#4a5a75; font-size:12px;">&middot;</span>
+                    <a href="https://www.gracelifefellowship.org/events" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Events</a>
+                    <span style="color:#4a5a75; font-size:12px;">&middot;</span>
+                    <a href="https://www.gracelifefellowship.org/give" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; padding:0 8px;">Give</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr><td style="height:24px; background-color:transparent; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+        </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`;
+    }
 
     // Escape HTML special characters (for user-typed content)
     function esc(str) {
@@ -746,8 +1527,14 @@ So when you feel insignificant or rejected, come back to this truth: your value 
 </html>`;
     }
 
+    // The active tab decides which builder runs. buildHTML() (devotional) keeps its
+    // name so build-preview.js can still extract it by regex.
+    function currentHTML() {
+      return activeTab === 'weekly' ? buildWeeklyHTML() : buildHTML();
+    }
+
     function copyHTML() {
-      const html = buildHTML();
+      const html = currentHTML();
       const btn = document.getElementById('copyBtn');
 
       const done = () => {
@@ -779,13 +1566,14 @@ So when you feel insignificant or rejected, come back to this truth: your value 
     }
 
     function downloadHTML() {
-      const html = buildHTML();
+      const html = currentHTML();
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const date = document.getElementById('email_date').value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
+      const dateId = activeTab === 'weekly' ? 'w_weekof' : 'email_date';
+      const date = document.getElementById(dateId).value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
       a.href = url;
-      a.download = 'GLF-Devotional-' + date + '.html';
+      a.download = (activeTab === 'weekly' ? 'GLF-Weekly-News-' : 'GLF-Devotional-') + date + '.html';
       a.click();
       URL.revokeObjectURL(url);
       showToast('⬇ File downloaded!');
@@ -797,6 +1585,64 @@ So when you feel insignificant or rejected, come back to this truth: your value 
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3500);
     }
+
+    /* ══════════════════ ADD-LINK CHIP ══════════════════ */
+    // Highlight text in any .allow-links box → a floating 🔗 button appears;
+    // clicking it asks for the web address and wraps the selection as [text](url).
+    const linkBtn = document.createElement('button');
+    linkBtn.type = 'button';
+    linkBtn.className = 'link-btn';
+    linkBtn.textContent = '🔗 Add Link';
+    document.body.appendChild(linkBtn);
+    let linkTA = null;
+
+    document.addEventListener('mouseup', e => {
+      if (e.target === linkBtn) return;
+      const ta = e.target;
+      if (!(ta.tagName === 'TEXTAREA' && ta.classList.contains('allow-links'))) {
+        linkBtn.classList.remove('show');
+        return;
+      }
+      // Wait a tick so the browser finalizes the selection first
+      setTimeout(() => {
+        if (ta.selectionStart < ta.selectionEnd) {
+          linkTA = ta;
+          linkBtn.style.left = Math.min(e.clientX, window.innerWidth - 130) + 'px';
+          linkBtn.style.top = Math.max(8, e.clientY - 46) + 'px';
+          linkBtn.classList.add('show');
+        } else {
+          linkBtn.classList.remove('show');
+        }
+      }, 0);
+    });
+
+    // mousedown would steal focus and collapse the selection — block it
+    linkBtn.addEventListener('mousedown', e => e.preventDefault());
+
+    linkBtn.addEventListener('click', () => {
+      linkBtn.classList.remove('show');
+      if (!linkTA) return;
+      const s = linkTA.selectionStart, e = linkTA.selectionEnd;
+      if (s >= e) return;
+      const selText = linkTA.value.slice(s, e);
+      let url = prompt('Link "' + selText + '" to this web address:', 'https://');
+      if (!url || url.trim() === '' || url.trim() === 'https://') return;
+      url = url.trim();
+      if (!/^(https?:\/\/|mailto:)/i.test(url)) url = 'https://' + url;
+      const wrapped = '[' + selText + '](' + url + ')';
+      linkTA.value = linkTA.value.slice(0, s) + wrapped + linkTA.value.slice(e);
+      linkTA.classList.remove('is-default');
+      linkTA.focus();
+      linkTA.setSelectionRange(s, s + wrapped.length);
+      linkTA.dispatchEvent(new Event('input'));  // re-run auto-resize
+    });
+
+    /* ══════════════════ LOAD ══════════════════ */
+    // Wire every static field (both tabs), then build the seeded event cards.
+    document.querySelectorAll('input[type="text"], textarea').forEach(initField);
+    initWeekly();
+    // Honor a deep link: index.html#weekly opens the events tab directly.
+    if (location.hash === '#weekly') switchTab('weekly');
   </script>
 
 </body>
