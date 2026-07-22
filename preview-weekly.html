@@ -20,6 +20,11 @@
     img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
     /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
     a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+    /* Let long tokens (emails, URLs, big numbers) break mid-word. A single unbreakable
+       word sets a minimum width for its column; if that exceeds the phone width, iOS
+       Mail abandons reflow and zoom-shrinks the whole email. This is the #1 cause of
+       a long email rendering tiny/desktop-width on iPhone. */
+    td, p, h1, h2, h3, a, span, li { word-break: break-word !important; overflow-wrap: break-word !important; }
     body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Satoshi', 'Segoe UI', Arial, Helvetica, sans-serif; background-color: #081158; color: #1a1a2e; }
     .email-container { width: 100% !important; max-width: 600px !important; }
     /* Constrain ONLY Elexio's auto-appended unsubscribe paragraph (matched by the link it contains) */
@@ -90,7 +95,7 @@
                 </tr>
               </table>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="height:22px; font-size:0; line-height:0;">&nbsp;</td></tr></table>
-              <p style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:#ec8675;">Week of July &zwnj;12, 2026</p>
+              <p style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:#ec8675;">Week of July &zwnj;23, 2026</p>
               <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:15px; line-height:25px; color:#1a1a2e;">Here's what's happening at Grace Life Fellowship.<br>We'd love to see you there!</p>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="60" align="left" style="margin-top:26px;">
                 <tr><td style="background-color:#ec8675; height:3px; border-radius:2px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
@@ -105,10 +110,10 @@
                 <tr>
                   <td class="date-col" width="104" bgcolor="#eac18b" align="center" valign="middle" style="width:104px; background-color:#eac18b; border-radius:12px 0 0 12px; padding:22px 0; text-align:center;">
                     <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#081158;">Sunday</p>
-                    <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:#081158;">12</p>
+                    <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:#081158;">26</p>
                     <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#081158;">July</p>
                   </td>
-                  <td class="tile-pad" bgcolor="#f6ecdc" valign="top" style="background-color:#f6ecdc; border-radius:0 12px 12px 0; padding:22px 26px;">
+                  <td class="tile-pad" bgcolor="#f6ecdc" valign="top" style="background-color:#f6ecdc; border-radius:0 12px 12px 0; padding:22px 26px; word-break:break-word; overflow-wrap:break-word;">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="margin-bottom:10px;">
                       <tr><td bgcolor="#eac18b" style="background-color:#eac18b; border-radius:50px; padding:4px 12px; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#081158;">All Church</td></tr>
                     </table>
@@ -116,9 +121,55 @@
                       <tr>
                         <td>
                           <h2 style="margin:0 0 8px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:19px; line-height:24px; font-weight:800; color:#081158;">Elective Hour &amp; Worship Service</h2>
-                          <p style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:23px; color:#1a1a2e;">Join us for <strong style="color:#081158;">9&zwnj;am Elective Hour</strong> and the <strong style="color:#081158;">10:&zwnj;15&zwnj;am Worship Service</strong> as Pastor Tim Boswell continues the three-part series, <em>Traveler's Guide to Planet Earth</em>.</p>
-                          <p style="margin:0 0 6px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#1a1a2e;"><strong style="color:#081158;">Kids Ministry</strong> — childcare at 9&zwnj;am, kids' service at 10:&zwnj;15&zwnj;am (8 weeks – 5th grade).</p>
-                          <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#1a1a2e;"><strong style="color:#081158;">Youth Ministry</strong> — Bible study at 9&zwnj;am, youth service at 10:&zwnj;15&zwnj;am (6th – 12th graders).</p>
+                          <p style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:23px; color:#1a1a2e;">Join us for <a href="https://www.gracelifefellowship.org/connect/elective-hour" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">9&zwnj;am Elective Hour</a> and 10:&zwnj;15&zwnj;am Worship Service as Pastor Tim Chalas continues the series <em>Real Life. Real Joy., A Study of Philippians</em>.</p>
+                          <p style="margin:0 0 6px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#1a1a2e;">Kids Ministry offers childcare at 9&zwnj;am and a kids' service at 10:&zwnj;15&zwnj;am (8 weeks – 5th grade).</p>
+                          <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#1a1a2e;">Youth Ministry offers Bible study at 9&zwnj;am and a youth service at 10:&zwnj;15&zwnj;am (6th – 12th graders).</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="height:22px; font-size:0; line-height:0;">&nbsp;</td></tr></table>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-radius:12px;">
+                <tr>
+                  <td class="date-col" width="104" bgcolor="#faa421" align="center" valign="middle" style="width:104px; background-color:#faa421; border-radius:12px 0 0 12px; padding:22px 0; text-align:center;">
+                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#081158;">Friday</p>
+                    <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:#081158;">31</p>
+                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#081158;">July</p>
+                  </td>
+                  <td class="tile-pad" bgcolor="#fef4e4" valign="top" style="background-color:#fef4e4; border-radius:0 12px 12px 0; padding:22px 26px; word-break:break-word; overflow-wrap:break-word;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="margin-bottom:10px;">
+                      <tr><td bgcolor="#faa421" style="background-color:#faa421; border-radius:50px; padding:4px 12px; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#081158;">Kids</td></tr>
+                    </table>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td>
+                          <h2 style="margin:0 0 8px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:19px; line-height:24px; font-weight:800; color:#081158;">Elementary Take Over</h2>
+                          <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:23px; color:#1a1a2e;">All elementary kids, those entering 2nd through those entering 5th grade, and their chaperones are invited to GLK's Elementary Take Over on Friday, July &zwnj;31 from 6-7:&zwnj;30&zwnj;pm in the GLF Gym and Youth Room. Come play basketball, video games, arts and crafts, and enjoy a pizza dinner. All students must have a chaperone attend with them. The cost to attend is $10 per child. Register at <a href="https://www.gracelifefellowship.org/events" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">GLF.events</a>.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="height:22px; font-size:0; line-height:0;">&nbsp;</td></tr></table>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-radius:12px;">
+                <tr>
+                  <td class="date-col" width="104" bgcolor="#081158" align="center" valign="middle" style="width:104px; background-color:#081158; border-radius:12px 0 0 12px; padding:22px 0; text-align:center;">
+                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#ffffff;">Sunday</p>
+                    <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:#ffffff;">02</p>
+                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#ffffff;">August</p>
+                  </td>
+                  <td class="tile-pad" bgcolor="#dadbe6" valign="top" style="background-color:#dadbe6; border-radius:0 12px 12px 0; padding:22px 26px; word-break:break-word; overflow-wrap:break-word;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="margin-bottom:10px;">
+                      <tr><td bgcolor="#081158" style="background-color:#081158; border-radius:50px; padding:4px 12px; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#ffffff;">Men</td></tr>
+                    </table>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td>
+                          <h2 style="margin:0 0 8px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:19px; line-height:24px; font-weight:800; color:#081158;">Men's Night Out</h2>
+                          <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:23px; color:#1a1a2e;">Guys, come join us for a relaxed evening of pizza, sandwiches, fellowship, and great conversation at Rally Cap Brewing Company on August &zwnj;2 from 5 to 7&zwnj;pm. No agenda—just a chance to connect with other men from GLF. Invite a friend, and we'll see you there!</p>
                         </td>
                       </tr>
                     </table>
@@ -134,19 +185,22 @@
             <td style="background-color:#ffffff; padding: 34px 40px 40px 40px;" class="pad-mobile">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td bgcolor="#eef3f8" class="tile-pad" style="background-color:#eef3f8; border:1.5px solid #c5d3f0; border-radius:12px; padding:28px 32px;">
-                    <p style="margin:0 0 10px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">Missions Update</p>
-                    <h3 style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; font-weight:800; color:#081158;">Hope for Croatia</h3>
-                    <p style="margin:0 0 16px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:24px; color:#1a1a2e;">Hope for Croatia is dedicated to bringing Biblical ideals to the secular society of Croatia — living hope to people in need, the saving love of Christ to those open to the Gospel, and His victorious Life to all who believe in Him. This mission is fulfilled through counseling, training, publishing, foster care ministries, Christian art, and the local church.</p>
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                      <tr>
-                        <td width="4" valign="top" style="width:4px; min-width:4px; background-color:#eac18b; border-radius:3px; font-size:0; line-height:0;">&nbsp;</td>
-                        <td width="18" style="width:18px; font-size:0; line-height:0;">&nbsp;</td>
-                        <td valign="top">
-                          <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:15px; line-height:25px; font-style:italic; color:#081158;">Please pray for God's blessing on their upcoming Christian camp, for the continued miraculous healing of their foster daughter Mauricia, and that the Lord will open more room and bring living fruit to their various ministries.</p>
-                        </td>
-                      </tr>
+                  <td bgcolor="#eef3f8" class="tile-pad" style="background-color:#eef3f8; border:1.5px solid #c5d3f0; border-radius:12px; padding:28px 32px; word-break:break-word; overflow-wrap:break-word;">
+                    <p style="margin:0 0 10px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">Financial Update</p>
+                    <h3 style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; font-weight:800; color:#081158;">End of the Fiscal Year</h3>
+                    <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:24px; color:#1a1a2e;">As we approach the close of our fiscal year, we thank God for His faithful provision and for your continued generosity. Through June, Grace Life has received $2,032,768.92, with $1,999,796.78 in expenses, for a difference of $32,972.14. Your faithful giving has made it possible to share the gospel, care for families, support missionaries, and serve our community well throughout the year. If you would like to make a fiscal year-end gift, you may give online at <a href="https://www.gracelifefellowship.org/give" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">gracelifefellowship.org/give</a>, mail your donation to the church office, or place it in any of the offering boxes. Thank you for partnering with us as we continue proclaiming the hope of Jesus together.</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;">
+                      <tr><td style="background-color:#c5d3f0; height:1px; font-size:1px; line-height:1px; mso-line-height-rule:exactly;">&nbsp;</td></tr>
                     </table>
+                    <p style="margin:0 0 10px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">Kids Ministry</p>
+                    <h3 style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; font-weight:800; color:#081158;">Join the Team</h3>
+                    <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:24px; color:#1a1a2e;">You are invited to join the Grace Life Kids Ministry Volunteer Team. Help make a lasting impact in the lives of our children by serving in Grace Life Kids! Whether you love caring for little ones, sharing Bible stories, welcoming families, or leading small group discussions, there's a place for you. Volunteers are needed in all age areas during both 9&zwnj;am Elective Hour and 10:&zwnj;15&zwnj;am Worship Service. Volunteer opportunities include nursery care, storytellers, greeters, and small group leaders. If you're interested in serving, <a href="https://www.gracelifefellowship.org/events" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">CLICK HERE</a> to see which area you'd like to explore, and someone from our team will follow up with you soon. We'd love to help you find the perfect fit!</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;">
+                      <tr><td style="background-color:#c5d3f0; height:1px; font-size:1px; line-height:1px; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>
+                    <p style="margin:0 0 10px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#5b95d2;">Grace Life Preschool</p>
+                    <h3 style="margin:0 0 12px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; font-weight:800; color:#081158;">Join the Staff</h3>
+                    <p style="margin:0 0 0 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:14px; line-height:24px; color:#1a1a2e;">We are seeking a passionate and caring assistant teacher to join our amazing team of educators and caregivers for the 2026-2027 school year. This is a part-time position, Monday through Thursday, in a Christ-centered preschool environment where you can make a lasting impact in the lives of children and families. If you love working with children and being part of a supportive team, we would love to hear from you. For more information, contact the preschool director at Kathryn.Chalas@GraceLifePreschool.org.</p>
                   </td>
                 </tr>
               </table>

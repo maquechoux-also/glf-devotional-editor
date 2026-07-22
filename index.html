@@ -551,8 +551,8 @@ So when you feel insignificant or rejected, come back to this truth: your value 
           </div>
         </div>
         <div class="field">
-          <label>Week Of <span class="hint">e.g. Week of July 12, 2026</span></label>
-          <input type="text" id="w_weekof" value="Week of July 12, 2026">
+          <label>Week Of <span class="hint">e.g. Week of July 23, 2026</span></label>
+          <input type="text" id="w_weekof" value="Week of July 23, 2026">
         </div>
         <div class="field">
           <label>Intro Sentence <span class="hint">press Enter for a line break</span></label>
@@ -681,18 +681,31 @@ We'd love to see you there!</textarea>
     };
     const THEME_ORDER = ['All Church', 'Life Groups', 'Kids', 'Middle School', 'High School', 'All Youth', 'Men', 'Women', 'Discipleship'];
 
-    // Starting-point event — the recurring Sunday service; add the rest each week.
+    // Preloaded with the real July 23, 2026 Weekly News copy so the client can test
+    // with actual content. Replace each week (or edit in place).
     const SEED_EVENTS = [
-      { theme: 'All Church', dow: 'Sunday', day: '12', month: 'July', group: 'All Church',
+      { theme: 'All Church', dow: 'Sunday', day: '26', month: 'July', group: 'All Church',
         title: 'Elective Hour & Worship Service',
-        body: "Join us for **9am Elective Hour** and the **10:15am Worship Service** as Pastor Tim Boswell continues the three-part series, *Traveler's Guide to Planet Earth*.\n\n**Kids Ministry** — childcare at 9am, kids' service at 10:15am (8 weeks – 5th grade).\n\n**Youth Ministry** — Bible study at 9am, youth service at 10:15am (6th – 12th graders)." }
+        body: "Join us for [9am Elective Hour](https://www.gracelifefellowship.org/connect/elective-hour) and 10:15am Worship Service as Pastor Tim Chalas continues the series *Real Life. Real Joy., A Study of Philippians*.\n\nKids Ministry offers childcare at 9am and a kids' service at 10:15am (8 weeks – 5th grade).\n\nYouth Ministry offers Bible study at 9am and a youth service at 10:15am (6th – 12th graders)." },
+      { theme: 'Kids', dow: 'Friday', day: '31', month: 'July', group: 'Kids',
+        title: 'Elementary Take Over',
+        body: "All elementary kids, those entering 2nd through those entering 5th grade, and their chaperones are invited to GLK's Elementary Take Over on Friday, July 31 from 6-7:30pm in the GLF Gym and Youth Room. Come play basketball, video games, arts and crafts, and enjoy a pizza dinner. All students must have a chaperone attend with them. The cost to attend is $10 per child. Register at [GLF.events](https://www.gracelifefellowship.org/events)." },
+      { theme: 'Men', dow: 'Sunday', day: '02', month: 'August', group: 'Men',
+        title: "Men's Night Out",
+        body: "Guys, come join us for a relaxed evening of pizza, sandwiches, fellowship, and great conversation at Rally Cap Brewing Company on August 2 from 5 to 7pm. No agenda—just a chance to connect with other men from GLF. Invite a friend, and we'll see you there!" }
     ];
 
-    // Seed announcement(s) — same starting-point idea as the events.
+    // Preloaded with the real July 23, 2026 announcements.
     const ANN_SEED = [
-      { eyebrow: 'Missions Update', headline: 'Hope for Croatia',
-        body: "Hope for Croatia is dedicated to bringing Biblical ideals to the secular society of Croatia — living hope to people in need, the saving love of Christ to those open to the Gospel, and His victorious Life to all who believe in Him. This mission is fulfilled through counseling, training, publishing, foster care ministries, Christian art, and the local church.",
-        quote: "Please pray for God's blessing on their upcoming Christian camp, for the continued miraculous healing of their foster daughter Mauricia, and that the Lord will open more room and bring living fruit to their various ministries." }
+      { eyebrow: 'Financial Update', headline: 'End of the Fiscal Year',
+        body: "As we approach the close of our fiscal year, we thank God for His faithful provision and for your continued generosity. Through June, Grace Life has received $2,032,768.92, with $1,999,796.78 in expenses, for a difference of $32,972.14. Your faithful giving has made it possible to share the gospel, care for families, support missionaries, and serve our community well throughout the year. If you would like to make a fiscal year-end gift, you may give online at [gracelifefellowship.org/give](https://www.gracelifefellowship.org/give), mail your donation to the church office, or place it in any of the offering boxes. Thank you for partnering with us as we continue proclaiming the hope of Jesus together.",
+        quote: "" },
+      { eyebrow: 'Kids Ministry', headline: 'Join the Team',
+        body: "You are invited to join the Grace Life Kids Ministry Volunteer Team. Help make a lasting impact in the lives of our children by serving in Grace Life Kids! Whether you love caring for little ones, sharing Bible stories, welcoming families, or leading small group discussions, there's a place for you. Volunteers are needed in all age areas during both 9am Elective Hour and 10:15am Worship Service. Volunteer opportunities include nursery care, storytellers, greeters, and small group leaders. If you're interested in serving, [CLICK HERE](https://www.gracelifefellowship.org/events) to see which area you'd like to explore, and someone from our team will follow up with you soon. We'd love to help you find the perfect fit!",
+        quote: "" },
+      { eyebrow: 'Grace Life Preschool', headline: 'Join the Staff',
+        body: "We are seeking a passionate and caring assistant teacher to join our amazing team of educators and caregivers for the 2026-2027 school year. This is a part-time position, Monday through Thursday, in a Christ-centered preschool environment where you can make a lasting impact in the lives of children and families. If you love working with children and being part of a supportive team, we would love to hear from you. For more information, contact the preschool director at Kathryn.Chalas@GraceLifePreschool.org.",
+        quote: "" }
     ];
 
     // Escape for use inside a double-quoted HTML attribute value.
@@ -1020,7 +1033,7 @@ We'd love to see you there!</textarea>
                     <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:${dateText};">${day}</p>
                     <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${month}</p>
                   </td>
-                  <td class="tile-pad" bgcolor="${T.tile}" valign="top" style="background-color:${T.tile}; border-radius:0 12px 12px 0; padding:22px 26px;">
+                  <td class="tile-pad" bgcolor="${T.tile}" valign="top" style="background-color:${T.tile}; border-radius:0 12px 12px 0; padding:22px 26px; word-break:break-word; overflow-wrap:break-word;">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="margin-bottom:10px;">
                       <tr><td bgcolor="${T.accent}" style="background-color:${T.accent}; border-radius:50px; padding:4px 12px; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:${dateText};">${group}</td></tr>
                     </table>
@@ -1094,7 +1107,7 @@ We'd love to see you there!</textarea>
             <td style="background-color:#ffffff; padding: 34px 40px 40px 40px;" class="pad-mobile">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td bgcolor="#eef3f8" class="tile-pad" style="background-color:#eef3f8; border:1.5px solid #c5d3f0; border-radius:12px; padding:28px 32px;">${blocks.join(divider)}
+                  <td bgcolor="#eef3f8" class="tile-pad" style="background-color:#eef3f8; border:1.5px solid #c5d3f0; border-radius:12px; padding:28px 32px; word-break:break-word; overflow-wrap:break-word;">${blocks.join(divider)}
                   </td>
                 </tr>
               </table>
@@ -1137,6 +1150,11 @@ We'd love to see you there!</textarea>
     img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
     /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
     a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+    /* Let long tokens (emails, URLs, big numbers) break mid-word. A single unbreakable
+       word sets a minimum width for its column; if that exceeds the phone width, iOS
+       Mail abandons reflow and zoom-shrinks the whole email. This is the #1 cause of
+       a long email rendering tiny/desktop-width on iPhone. */
+    td, p, h1, h2, h3, a, span, li { word-break: break-word !important; overflow-wrap: break-word !important; }
     body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Satoshi', 'Segoe UI', Arial, Helvetica, sans-serif; background-color: #081158; color: #1a1a2e; }
     .email-container { width: 100% !important; max-width: 600px !important; }
     /* Constrain ONLY Elexio's auto-appended unsubscribe paragraph (matched by the link it contains) */
@@ -1409,6 +1427,9 @@ ${announcePanel}
     /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
     a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
     body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
+    /* Let long tokens (emails, URLs, big numbers) break mid-word so a single unbreakable
+       word can't force the layout wider than the phone and trigger iOS Mail's zoom-out. */
+    td, p, h1, h2, h3, a, span, li { word-break: break-word !important; overflow-wrap: break-word !important; }
     /* Hybrid responsive: the email-container is fluid (width:100%) and capped via max-width on modern clients; Outlook uses the ghost <table> in the conditional comment below */
     .email-container { width: 100% !important; max-width: 600px !important; }
     /* Constrain ONLY Elexio's auto-appended unsubscribe paragraph (matched by the link it contains) */
