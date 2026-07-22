@@ -127,6 +127,18 @@ const SEED_EVENTS = eval('(' + html.match(/const SEED_EVENTS = (\[[\s\S]*?\]);/)
 const asset = name => html.match(new RegExp('const ' + name + " = '([^']+)'"))[1];
 const LOGO = asset('LOGO'), RIBBON = asset('RIBBON'), WORDMARK = asset('WORDMARK');
 
+// Zero-width non-joiners in times/dates so iOS Mail can't auto-link them,
+// ported from the editor. Text-between-tags only; idempotent.
+function protectTimes(html) {
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (part.startsWith('<')) return part;
+    return part
+      .replace(/(\d):(\d)/g, '$1:&zwnj;$2')
+      .replace(/(\d)(am|pm)\b/gi, '$1&zwnj;$2')
+      .replace(/\b((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\s(\d{1,2})\b/gi, '$1 &zwnj;$2');
+  }).join('');
+}
+
 // Inline formatting, ported from the editor: [text](url) → sky link,
 // **bold** → navy strong, *italic* → em, newline → <br>
 function formatInline(s) {
@@ -289,10 +301,10 @@ const eventsSorted = datedSeeds.every(x => x.dt)
 
 const wVars = {
   preheader: val('w_preheader'),
-  weekof:    val('w_weekof'),
-  intro:     formatInline((values.w_intro || '').trim()),
-  tiles:     renderEventTiles(eventsSorted),
-  announcePanel: renderAnnouncements(ANN_SEED),
+  weekof:    protectTimes(val('w_weekof')),
+  intro:     protectTimes(formatInline((values.w_intro || '').trim())),
+  tiles:     protectTimes(renderEventTiles(eventsSorted)),
+  announcePanel: protectTimes(renderAnnouncements(ANN_SEED)),
   LOGO, RIBBON, WORDMARK,
 };
 

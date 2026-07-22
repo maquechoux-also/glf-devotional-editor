@@ -957,6 +957,20 @@ We'd love to see you there!</textarea>
       renderAnnouncementNumbers();
     }
 
+    // Insert zero-width non-joiners into times ("10:15", "9am") and month-day dates
+    // so iOS Mail's data detectors can't turn them into blue underlined links.
+    // Operates only on text between tags — URLs and inline styles are untouched.
+    // Idempotent: already-protected text contains no matchable sequences.
+    function protectTimes(html) {
+      return html.split(/(<[^>]+>)/).map(part => {
+        if (part.startsWith('<')) return part;
+        return part
+          .replace(/(\d):(\d)/g, '$1:&zwnj;$2')
+          .replace(/(\d)(am|pm)\b/gi, '$1&zwnj;$2')
+          .replace(/\b((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*)\s(\d{1,2})\b/gi, '$1 &zwnj;$2');
+      }).join('');
+    }
+
     // Inline formatting for body copy: [words](https://page) → sky-blue link,
     // **bold** → navy strong, *italic* → em, single newlines → <br>.
     // HTML-escape first so user text can't inject markup.
@@ -1091,10 +1105,11 @@ We'd love to see you there!</textarea>
     function buildWeeklyHTML() {
       const rawv = id => document.getElementById(id).value;
       const preheader = val('w_preheader');
-      const weekof    = val('w_weekof');
-      const intro     = formatInline(rawv('w_intro').trim());
-      const tiles     = renderEventTiles();
-      const announcePanel = renderAnnouncements();
+      // protectTimes: stop iOS from auto-linking the dates/times in the copy
+      const weekof    = protectTimes(val('w_weekof'));
+      const intro     = protectTimes(formatInline(rawv('w_intro').trim()));
+      const tiles     = protectTimes(renderEventTiles());
+      const announcePanel = protectTimes(renderAnnouncements());
 
       const LOGO = 'https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a025f4f152c26a0f09c8a73_GLF_white_bug.png';
       const RIBBON = 'https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a5e8909fb50a451444256a6_glf-email-bookmark-ribbon.png';
@@ -1104,8 +1119,11 @@ We'd love to see you there!</textarea>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Spaces around the equals signs are deliberate: Elexio's mailer eats any equals
+       sign followed by two hex digits (quoted-printable decoding), which corrupts the
+       usual compact form of this tag. The spaced form parses identically and has no
+       such sequence, so it survives delivery. Do not "clean up" the spaces. -->
+  <meta name="viewport" content="width = device-width, initial-scale = 1.0">
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
   <title>Grace Life Fellowship — Weekly News</title>
   <!--[if mso]>
@@ -1117,6 +1135,8 @@ We'd love to see you there!</textarea>
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
     body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Satoshi', 'Segoe UI', Arial, Helvetica, sans-serif; background-color: #081158; color: #1a1a2e; }
     .email-container { width: 100% !important; max-width: 600px !important; }
     /* Constrain ONLY Elexio's auto-appended unsubscribe paragraph (matched by the link it contains) */
@@ -1241,7 +1261,7 @@ ${announcePanel}
                 </tr>
                 <tr>
                   <td align="center" style="padding-bottom:20px;">
-                    <p style="margin:0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;&middot;&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                    <p style="margin:0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;&middot;&nbsp; Baton Rouge, LA<br>Sundays at 10:&zwnj;15&zwnj;am</p>
                   </td>
                 </tr>
                 <tr>
@@ -1371,8 +1391,11 @@ ${announcePanel}
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Spaces around the equals signs are deliberate: Elexio's mailer eats any equals
+       sign followed by two hex digits (quoted-printable decoding), which corrupts the
+       usual compact form of this tag. The spaced form parses identically and has no
+       such sequence, so it survives delivery. Do not "clean up" the spaces. -->
+  <meta name="viewport" content="width = device-width, initial-scale = 1.0">
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
   <title>Grace Life Fellowship — Weekly Devotional</title>
   <!--[if mso]>
@@ -1383,6 +1406,8 @@ ${announcePanel}
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
     body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
     /* Hybrid responsive: the email-container is fluid (width:100%) and capped via max-width on modern clients; Outlook uses the ghost <table> in the conditional comment below */
     .email-container { width: 100% !important; max-width: 600px !important; }
@@ -1541,7 +1566,7 @@ ${announcePanel}
                 </tr>
                 <tr>
                   <td align="center" style="padding-bottom:20px;">
-                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:&zwnj;15&zwnj;am</p>
                   </td>
                 </tr>
                 <tr>

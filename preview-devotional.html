@@ -2,8 +2,11 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Spaces around the equals signs are deliberate: Elexio's mailer eats any equals
+       sign followed by two hex digits (quoted-printable decoding), which corrupts the
+       usual compact form of this tag. The spaced form parses identically and has no
+       such sequence, so it survives delivery. Do not "clean up" the spaces. -->
+  <meta name="viewport" content="width = device-width, initial-scale = 1.0">
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
   <title>Grace Life Fellowship — Weekly Devotional</title>
   <!--[if mso]>
@@ -14,6 +17,8 @@
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
     body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
     /* Hybrid responsive: the email-container is fluid (width:100%) and capped via max-width on modern clients; Outlook uses the ghost <table> in the conditional comment below */
     .email-container { width: 100% !important; max-width: 600px !important; }
@@ -184,7 +189,7 @@
                 </tr>
                 <tr>
                   <td align="center" style="padding-bottom:20px;">
-                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:#7389ab;">10210 Baringer Foreman Road &nbsp;·&nbsp; Baton Rouge, LA<br>Sundays at 10:&zwnj;15&zwnj;am</p>
                   </td>
                 </tr>
                 <tr>
