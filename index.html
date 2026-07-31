@@ -887,6 +887,8 @@ We'd love to see you there!</textarea>
     // The email is built from the on-screen card order, so moving a card here is
     // exactly what moves the tile in the email. "⇅ Sort by Date" still exists for
     // when soonest-first is what you want.
+    // Announcement cards carry both .event-card and .announce-card, so this one
+    // handler serves both lists — each card only ever moves within its own wrapper.
     function moveEvent(btn, dir) {
       const card = btn.closest('.event-card');
       const wrap = card.parentElement;
@@ -896,13 +898,14 @@ We'd love to see you there!</textarea>
         wrap.insertBefore(card.nextElementSibling, card);
       } else return;
       renderEventNumbers();
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      renderAnnouncementNumbers();
+      if (card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     // Cards are only draggable while the grip is held, so text selection inside the
     // fields keeps working normally.
-    function initEventDragging() {
-      const wrap = document.getElementById('weekly-events');
+    function initEventDragging(containerId) {
+      const wrap = document.getElementById(containerId || 'weekly-events');
       if (!wrap || wrap.dataset.dragReady) return;
       wrap.dataset.dragReady = '1';
 
@@ -925,6 +928,7 @@ We'd love to see you there!</textarea>
         if (card) { card.classList.remove('dragging'); card.draggable = false; }
         wrap.querySelectorAll('.drop-target').forEach(c => c.classList.remove('drop-target'));
         renderEventNumbers();
+        renderAnnouncementNumbers();
       });
       wrap.addEventListener('dragover', e => {
         e.preventDefault();
@@ -1100,7 +1104,12 @@ We'd love to see you there!</textarea>
       div.className = 'event-card announce-card';
       div.innerHTML = `
         <div class="ev-head">
-          <span class="ev-num"></span>
+          <span class="ev-head-left">
+            <span class="ev-drag" title="Drag to reorder">⠿</span>
+            <span class="ev-num"></span>
+            <button class="ev-move" onclick="moveEvent(this,-1)" title="Move up">▲</button>
+            <button class="ev-move" onclick="moveEvent(this,1)" title="Move down">▼</button>
+          </span>
           <button class="btn-remove" onclick="removeAnnouncement(this)">✕ Remove</button>
         </div>
         <div class="field-grid">
@@ -1113,8 +1122,14 @@ We'd love to see you there!</textarea>
     }
 
     function renderAnnouncementNumbers() {
-      document.querySelectorAll('#weekly-announcements .announce-card').forEach((c, i) => {
+      const cards = [...document.querySelectorAll('#weekly-announcements .announce-card')];
+      cards.forEach((c, i) => {
         c.querySelector('.ev-num').textContent = 'Announcement ' + (i + 1);
+        const moves = c.querySelectorAll('.ev-move');
+        if (moves.length === 2) {
+          moves[0].disabled = (i === 0);
+          moves[1].disabled = (i === cards.length - 1);
+        }
       });
     }
 
@@ -1437,7 +1452,8 @@ We'd love to see you there!</textarea>
         el.querySelectorAll('input, textarea').forEach(initField);
       });
       renderAnnouncementNumbers();
-      initEventDragging();
+      initEventDragging('weekly-events');
+      initEventDragging('weekly-announcements');
       // Restore the saved sheet link so the client only ever pastes it once.
       try {
         const saved = localStorage.getItem(SHEET_KEY);
