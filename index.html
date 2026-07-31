@@ -1057,7 +1057,10 @@ We'd love to see you there!</textarea>
       saveSheetUrl();
       sheetStatus('Loading…');
 
-      fetch(url)
+      // Cache-bust: without this the browser (and Google's edge cache) will happily
+      // hand back the copy from the last load, so a just-added row never shows up.
+      const bust = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+      fetch(bust, { cache: 'no-store' })
         .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
         .then(text => {
           const rows = parseCSV(text);
@@ -1082,7 +1085,7 @@ We'd love to see you there!</textarea>
           const end = new Date(anchor);
           end.setDate(end.getDate() + SHEET_WINDOW_DAYS);
 
-          let skipped = 0;
+          let skipped = 0, outside = 0, outsideSoonest = null;
           const picked = rows.slice(1).map(r => {
             const d = parseSheetDate(r[iDate]);
             const endD = iEnd >= 0 && iEnd !== iDate ? parseSheetDate(r[iEnd]) : null;
@@ -1090,7 +1093,11 @@ We'd love to see you there!</textarea>
             if (!d || !title) { if (r.some(x => x.trim())) skipped++; return null; }
             const inWindow = d >= anchor && d <= end;
             const ongoing  = endD && d <= anchor && endD >= anchor;
-            if (!inWindow && !ongoing) return null;
+            if (!inWindow && !ongoing) {
+              outside++;
+              if (d > end && (!outsideSoonest || d < outsideSoonest)) outsideSoonest = d;
+              return null;
+            }
             return {
               date: d,
               ev: rowToEvent(d, iTheme >= 0 ? r[iTheme] : '', iGroup >= 0 ? r[iGroup] : '',
@@ -1124,11 +1131,17 @@ We'd love to see you there!</textarea>
             el.querySelectorAll('input, textarea').forEach(initField);
           });
           renderEventNumbers();
-          sheetStatus('✅ Loaded ' + picked.length + ' event' + (picked.length === 1 ? '' : 's') +
-            ' for ' + anchor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' +
-            end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-            (skipped ? ' · ' + skipped + ' row(s) skipped (missing date or event name)' : '') +
-            '. Review the cards below, then Copy HTML.', 'ok');
+          const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          let note = '✅ Loaded ' + picked.length + ' event' + (picked.length === 1 ? '' : 's') +
+            ' dated ' + fmt(anchor) + '–' + fmt(end) +
+            ' (at ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) + ').';
+          if (outside) {
+            note += ' ' + outside + ' event' + (outside === 1 ? '' : 's') + ' in the sheet fall outside that range' +
+              (outsideSoonest ? ' — next one is ' + fmt(outsideSoonest) +
+                ', which will appear once “Week Of” reaches ' + fmt(new Date(outsideSoonest.getTime() - SHEET_WINDOW_DAYS * 864e5)) : '') + '.';
+          }
+          if (skipped) note += ' ' + skipped + ' row(s) skipped (missing date or event name).';
+          sheetStatus(note, 'ok');
           showToast('✅ Events loaded from the sheet');
         })
         .catch(err => sheetStatus('Could not read the sheet (' + err.message +
