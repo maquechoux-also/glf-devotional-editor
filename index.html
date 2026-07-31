@@ -235,6 +235,83 @@
       color: var(--purple);
     }
 
+    /* ── Mode tabs ── */
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: white;
+      border-radius: 50px;
+      padding: 6px;
+      box-shadow: 0 1px 6px rgba(8,17,88,0.07);
+    }
+    .mode-tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .mode-tab.active { background: var(--navy); color: white; }
+
+    /* ── Events list ── */
+    .events-status {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .events-status.error { color: #c0392b; }
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1.5px solid #dde6f0;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: #fafcff;
+    }
+    .event-item input[type=checkbox] {
+      width: 18px; height: 18px;
+      margin-top: 3px;
+      accent-color: var(--purple);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .event-item .ev-date {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--coral);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      margin-top: 4px;
+      width: 70px;
+      flex-shrink: 0;
+    }
+    .event-item .ev-body { flex: 1; }
+    .event-item .ev-name { font-size: 14px; font-weight: 700; color: var(--navy); }
+    .event-item .ev-details { font-size: 13px; color: var(--text); line-height: 1.5; margin-top: 2px; }
+    .btn-reload {
+      background: var(--navy);
+      color: white;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-reload:hover { background: var(--mid-navy); }
+
     @media (max-width: 600px) {
       .field-grid { grid-template-columns: 1fr; }
       .site-header { flex-direction: column; gap: 12px; text-align: center; }
@@ -258,9 +335,17 @@
 
   <div class="main">
 
+    <!-- Mode Tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-devotional" onclick="switchMode('devotional')">📖 Devotional</button>
+      <button class="mode-tab" id="tab-events" onclick="switchMode('events')">📅 Weekly Events</button>
+    </div>
+
     <div class="tip">
       <strong>How to use:</strong> Each field is pre-filled with last week's content as a starting point — just update whatever's changing this week. When you're done, click <strong>Copy HTML</strong> in the header, then paste into Elexio's code view. That's it!
     </div>
+
+    <div id="mode-devotional">
 
     <!-- ── EMAIL HEADER ── -->
     <div class="form-section">
@@ -409,6 +494,60 @@ So when you feel insignificant or rejected, come back to this truth: your value 
         <textarea id="give_subtext" rows="2">Consider giving financially to support the ministry of Grace Life Fellowship.</textarea>
       </div>
     </div>
+
+    </div><!-- /#mode-devotional -->
+
+    <!-- ══════════ WEEKLY EVENTS MODE ══════════ -->
+    <div id="mode-events" style="display:none;">
+
+      <!-- Email header fields -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">📧</div>
+          <div>
+            <h2>Email Header</h2>
+            <p>The title and date shown at the top of the events email</p>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Email Title</label>
+            <input type="text" id="ev_email_title" value="Weekly News">
+          </div>
+          <div class="field">
+            <label>Date Line</label>
+            <input type="text" id="ev_email_date" value="">
+          </div>
+        </div>
+        <div class="field">
+          <label>Preview Text <span class="hint">short teaser shown in the inbox</span></label>
+          <input type="text" id="ev_preheader" value="Here's what's happening at Grace Life this week!">
+        </div>
+        <div class="field">
+          <label>Intro Message <span class="hint">optional — a short greeting above the events list</span></label>
+          <textarea id="ev_intro" rows="2">Here's what's coming up at Grace Life Fellowship. We hope to see you there!</textarea>
+        </div>
+      </div>
+
+      <!-- Events from Google Sheet -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">📅</div>
+          <div>
+            <h2>This Week's Events</h2>
+            <p>Loaded automatically from the Google Sheet — uncheck any you don't want in this email</p>
+          </div>
+        </div>
+        <div class="field">
+          <label>Google Sheet CSV Link <span class="hint">set once — saved in this browser</span></label>
+          <input type="text" id="ev_sheet_url" placeholder="Paste the published-to-web CSV link here" onchange="saveSheetUrl()">
+        </div>
+        <p class="events-status" id="ev_status">No sheet connected yet.</p>
+        <div id="ev_list"></div>
+        <button class="btn-reload" onclick="loadEvents()">↻ Reload Events</button>
+      </div>
+
+    </div><!-- /#mode-events -->
 
   </div><!-- /.main -->
 
@@ -723,8 +862,360 @@ So when you feel insignificant or rejected, come back to this truth: your value 
 </html>`;
     }
 
+    // ══════════ MODE SWITCHING ══════════
+    let currentMode = 'devotional';
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('mode-devotional').style.display = mode === 'devotional' ? '' : 'none';
+      document.getElementById('mode-events').style.display = mode === 'events' ? '' : 'none';
+      document.getElementById('tab-devotional').classList.toggle('active', mode === 'devotional');
+      document.getElementById('tab-events').classList.toggle('active', mode === 'events');
+      if (mode === 'events') {
+        // default the date line to this week
+        const dl = document.getElementById('ev_email_date');
+        if (!dl.value) {
+          const now = new Date();
+          dl.value = 'Week of ' + now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+        // restore saved sheet URL and auto-load
+        const saved = localStorage.getItem('glfSheetUrl');
+        const urlField = document.getElementById('ev_sheet_url');
+        if (saved && !urlField.value) urlField.value = saved;
+        if (urlField.value && !window._eventsLoaded) loadEvents();
+      }
+    }
+
+    function saveSheetUrl() {
+      localStorage.setItem('glfSheetUrl', document.getElementById('ev_sheet_url').value.trim());
+    }
+
+    // ══════════ GOOGLE SHEET → EVENTS ══════════
+    let sheetEvents = [];   // { start:Date, end:Date|null, name, details, link }
+    const EVENT_WINDOW_DAYS = 14;
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], cell = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"' && text[i+1] === '"') { cell += '"'; i++; }
+          else if (c === '"') inQuotes = false;
+          else cell += c;
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ',') { row.push(cell); cell = ''; }
+          else if (c === '\n' || c === '\r') {
+            if (c === '\r' && text[i+1] === '\n') i++;
+            row.push(cell); cell = '';
+            if (row.some(x => x.trim() !== '')) rows.push(row);
+            row = [];
+          }
+          else cell += c;
+        }
+      }
+      row.push(cell);
+      if (row.some(x => x.trim() !== '')) rows.push(row);
+      return rows;
+    }
+
+    function parseDate(str) {
+      str = (str || '').trim();
+      if (!str) return null;
+      let m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);          // YYYY-MM-DD
+      if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+      m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);           // M/D/YYYY
+      if (m) return new Date(+m[3], +m[1]-1, +m[2]);
+      m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);           // M/D/YY
+      if (m) return new Date(2000 + +m[3], +m[1]-1, +m[2]);
+      const d = new Date(str);                                     // fallback (e.g. "Aug 3, 2026")
+      return isNaN(d) ? null : d;
+    }
+
+    function setStatus(msg, isError) {
+      const el = document.getElementById('ev_status');
+      el.textContent = msg;
+      el.classList.toggle('error', !!isError);
+    }
+
+    function loadEvents() {
+      const url = document.getElementById('ev_sheet_url').value.trim();
+      if (!url) { setStatus('Paste the Google Sheet CSV link above to connect.', true); return; }
+      saveSheetUrl();
+      setStatus('Loading events…');
+      fetch(url)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(text => {
+          const rows = parseCSV(text);
+          if (rows.length < 2) { setStatus('The sheet appears to be empty.', true); return; }
+          const headers = rows[0].map(h => h.trim().toLowerCase());
+          const col = name => headers.findIndex(h => h.includes(name));
+          const iDate = col('date'), iEnd = col('end'), iName = col('event'), iDetails = col('detail'), iLink = col('link');
+          if (iDate < 0 || iName < 0) { setStatus('Sheet needs at least a "Date" and an "Event" column.', true); return; }
+
+          const today = new Date(); today.setHours(0,0,0,0);
+          const windowEnd = new Date(today); windowEnd.setDate(windowEnd.getDate() + EVENT_WINDOW_DAYS);
+
+          sheetEvents = rows.slice(1).map(r => ({
+            start:   parseDate(r[iDate]),
+            end:     iEnd >= 0 && iEnd !== iDate ? parseDate(r[iEnd]) : null,
+            name:    (r[iName] || '').trim(),
+            details: iDetails >= 0 ? (r[iDetails] || '').trim() : '',
+            link:    iLink >= 0 ? (r[iLink] || '').trim() : ''
+          }))
+          .filter(ev => ev.name && ev.start)
+          .filter(ev => {
+            const startsInWindow = ev.start >= today && ev.start <= windowEnd;
+            const ongoing = ev.end && ev.start <= today && ev.end >= today;
+            return startsInWindow || ongoing;
+          })
+          .sort((a, b) => a.start - b.start);
+
+          window._eventsLoaded = true;
+          renderEventList();
+          setStatus(sheetEvents.length
+            ? sheetEvents.length + ' event(s) found in the next ' + EVENT_WINDOW_DAYS + ' days. Uncheck any to leave out.'
+            : 'Connected — but no events fall in the next ' + EVENT_WINDOW_DAYS + ' days.');
+        })
+        .catch(err => setStatus('Could not load the sheet (' + err.message + '). Check that it is published to the web as CSV.', true));
+    }
+
+    function renderEventList() {
+      const list = document.getElementById('ev_list');
+      list.innerHTML = '';
+      sheetEvents.forEach((ev, i) => {
+        const item = document.createElement('label');
+        item.className = 'event-item';
+        const dateLabel = ev.start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        item.innerHTML = '<input type="checkbox" checked data-idx="' + i + '">' +
+          '<span class="ev-date">' + dateLabel + '</span>' +
+          '<span class="ev-body"><span class="ev-name"></span><div class="ev-details"></div></span>';
+        item.querySelector('.ev-name').textContent = ev.name;
+        item.querySelector('.ev-details').textContent = ev.details;
+        list.appendChild(item);
+      });
+    }
+
+    function selectedEvents() {
+      const checks = document.querySelectorAll('#ev_list input[type=checkbox]');
+      const out = [];
+      checks.forEach(c => { if (c.checked) out.push(sheetEvents[+c.dataset.idx]); });
+      return out;
+    }
+
+    function buildEventRowsHTML(events) {
+      return events.map(ev => {
+        const mon = ev.start.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+        const day = ev.start.getDate();
+        const weekday = ev.start.toLocaleDateString('en-US', { weekday: 'long' });
+        let dateNote = weekday;
+        if (ev.end && ev.end > ev.start) {
+          dateNote = weekday + ' – ' + ev.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        const detailsHTML = ev.details ? '<p style="margin:4px 0 0 0; font-family:\'Inter\',Arial,sans-serif; font-size:14px; line-height:22px; color:#1a1a2e;">' + esc(ev.details) + '</p>' : '';
+        const linkHTML = ev.link ? '<p style="margin:6px 0 0 0;"><a href="' + ev.link.replace(/"/g, '&quot;') + '" target="_blank" style="font-family:\'Inter\',Arial,sans-serif; font-size:13px; font-weight:600; color:#5532FA; text-decoration:none;">More info &rarr;</a></p>' : '';
+        return `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:18px;">
+                <tr>
+                  <td width="56" valign="top">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="56">
+                      <tr>
+                        <td align="center" style="background-color:#081158; border-radius:10px; padding:8px 0 9px;">
+                          <span style="font-family:'Inter',Arial,sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; color:#ec8675; display:block;">${mon}</span>
+                          <span style="font-family:'Lora',Georgia,serif; font-size:22px; font-weight:600; color:#ffffff; display:block; line-height:26px;">${day}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td width="16" style="min-width:16px;">&nbsp;</td>
+                  <td valign="top">
+                    <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:18px; font-weight:600; color:#081158; line-height:24px;">${esc(ev.name)}</p>
+                    <p style="margin:2px 0 0 0; font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#8ea5a0;">${esc(dateNote)}</p>
+                    ${detailsHTML}
+                    ${linkHTML}
+                  </td>
+                </tr>
+              </table>`;
+      }).join('\n');
+    }
+
+    function buildEventsHTML() {
+      const title     = esc(document.getElementById('ev_email_title').value.trim());
+      const dateLine  = esc(document.getElementById('ev_email_date').value.trim());
+      const preheader = esc(document.getElementById('ev_preheader').value.trim());
+      const introRaw  = document.getElementById('ev_intro').value.trim();
+      const events    = selectedEvents();
+
+      const introHTML = introRaw ? `
+          <tr>
+            <td style="background-color:#ffffff; padding: 36px 48px 8px;" class="pad-mobile">
+              <p style="margin:0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:17px; line-height:28px; color:#1a1a2e;">${esc(introRaw)}</p>
+            </td>
+          </tr>` : '';
+
+      return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <title>Grace Life Fellowship — Weekly News</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+    body { font-family: 'Inter', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #081158; }
+    @media screen and (max-width: 620px) {
+      .email-container { width: 100% !important; }
+      .pad-mobile { padding-left: 24px !important; padding-right: 24px !important; }
+      .section-heading { font-size: 26px !important; }
+    }
+  </style>
+</head>
+<body width="100%" style="margin:0; padding:0; background-color:#eef3f8;">
+
+  <div style="display:none; max-height:0px; overflow:hidden;">${preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#eef3f8;">
+    <tr>
+      <td align="center" valign="top" style="padding: 24px 12px;">
+        <!--[if mso]>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" align="center"><tr><td>
+        <![endif]-->
+        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; max-width:600px; margin:auto;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background-color:#081158; border-radius:12px 12px 0 0; padding: 36px 48px 32px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 6px 0; font-family:'Inter',Arial,sans-serif; font-size:11px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:#5b95d2;">Grace Life Fellowship</p>
+                    <h1 style="margin:0 0 12px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:38px; line-height:1.15; font-weight:500; color:#ffffff; letter-spacing:-0.5px;">${title}</h1>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="60" align="center" style="margin: 0 auto;">
+                      <tr><td style="background-color:#ec8675; height:3px; border-radius:2px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>
+                    <p style="margin:14px 0 0 0; font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:400; color:rgba(255,255,255,0.65); letter-spacing:1px;">${dateLine}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+${introHTML}
+          <!-- EVENTS -->
+          <tr>
+            <td style="background-color:#ffffff; padding: 32px 48px 24px;" class="pad-mobile">
+${buildEventRowsHTML(events)}
+            </td>
+          </tr>
+
+          <!-- GIVE CTA -->
+          <tr>
+            <td style="background-color:#081158; padding: 32px 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin:0 0 6px 0; font-family:'Lora',Georgia,'Times New Roman',serif; font-size:20px; font-weight:500; font-style:italic; color:#ffffff; line-height:30px;">Has this been a blessing to you?</p>
+                    <p style="margin:0 0 20px 0; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:400; color:rgba(255,255,255,0.65); line-height:22px;">Consider giving financially to support the ministry of Grace Life Fellowship.</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="border-radius:50px; background-color:#5532FA;">
+                          <a href="https://www.gracelifefellowship.org/give" target="_blank" style="display:inline-block; padding:14px 40px; font-family:'Inter',Arial,sans-serif; font-size:14px; font-weight:600; letter-spacing:2px; color:#ffffff; text-decoration:none; border-radius:50px; mso-padding-alt:14px 40px;">GIVE</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#050d3d; border-radius:0 0 12px 12px; padding: 32px 48px 36px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom:12px;">
+                    <img src="https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6a025f4f152c26a0f09c8a73_GLF_white_bug.png" alt="Grace Life Fellowship" width="72" style="width:72px; height:auto; display:block; margin:0 auto; border:0; outline:none; text-decoration:none;">
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:16px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="40" align="center">
+                      <tr><td style="background-color:#ec8675; height:2px; border-radius:1px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:20px;">
+                    <p style="margin:0; font-family:'Inter',Arial,sans-serif; font-size:12px; line-height:20px; color:rgba(255,255,255,0.4);">10210 Baringer Foreman Road &nbsp;&middot;&nbsp; Baton Rouge, LA<br>Sundays at 10:15am</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom:24px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tr>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.youtube.com/@gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#FF0000; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:16px; font-weight:700; color:#ffffff; line-height:40px; display:block;">&#9654;</span></td></tr></table>
+                          </a>
+                        </td>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.instagram.com/gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background:#E1306C; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:13px; font-weight:700; color:#ffffff; line-height:40px; display:block;">IG</span></td></tr></table>
+                          </a>
+                        </td>
+                        <td style="padding: 0 6px;">
+                          <a href="https://www.facebook.com/gracelifefellowship" target="_blank" style="text-decoration:none;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#1877F2; border-radius:8px; width:40px; height:40px; text-align:center; vertical-align:middle;"><span style="font-family:'Inter',Arial,sans-serif; font-size:16px; font-weight:700; color:#ffffff; line-height:40px; display:block;">f</span></td></tr></table>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <a href="https://www.gracelifefellowship.org" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Website</a>
+                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">&middot;</span>
+                    <a href="https://www.gracelifefellowship.org/media/main" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Sermons</a>
+                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">&middot;</span>
+                    <a href="https://www.gracelifefellowship.org/events" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Events</a>
+                    <span style="color:rgba(255,255,255,0.2); font-size:12px;">&middot;</span>
+                    <a href="https://www.gracelifefellowship.org/give" target="_blank" style="font-family:'Inter',Arial,sans-serif; font-size:12px; font-weight:500; color:#5b95d2; text-decoration:none; margin:0 8px;">Give</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr><td style="height:24px; background-color:transparent;"></td></tr>
+
+        </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`;
+    }
+
+    function buildOutput() {
+      return currentMode === 'events' ? buildEventsHTML() : buildHTML();
+    }
+
     function copyHTML() {
-      const html = buildHTML();
+      const html = buildOutput();
       const btn = document.getElementById('copyBtn');
 
       const done = () => {
@@ -756,13 +1247,15 @@ So when you feel insignificant or rejected, come back to this truth: your value 
     }
 
     function downloadHTML() {
-      const html = buildHTML();
+      const html = buildOutput();
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const date = document.getElementById('email_date').value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
+      const dateField = currentMode === 'events' ? 'ev_email_date' : 'email_date';
+      const prefix = currentMode === 'events' ? 'GLF-Weekly-News-' : 'GLF-Devotional-';
+      const date = document.getElementById(dateField).value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
       a.href = url;
-      a.download = 'GLF-Devotional-' + date + '.html';
+      a.download = prefix + date + '.html';
       a.click();
       URL.revokeObjectURL(url);
       showToast('⬇ File downloaded!');
