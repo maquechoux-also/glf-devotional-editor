@@ -1525,9 +1525,9 @@ We'd love to see you there!</textarea>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-radius:12px;">
                 <tr>
                   <td class="date-col" width="104" bgcolor="${T.accent}" align="center" valign="middle" style="width:104px; background-color:${T.accent}; border-radius:12px 0 0 12px; padding:22px 0; text-align:center;">
-                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${dow}</p>
+                    <p class="date-lbl" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${dow}</p>
                     <p class="date-num" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:44px; font-weight:900; line-height:46px; mso-line-height-rule:exactly; color:${dateText};">${day}</p>
-                    <p style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${month}</p>
+                    <p class="date-lbl" style="margin:0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:${dateText};">${month}</p>
                   </td>
                   <td class="tile-pad" bgcolor="${T.tile}" valign="top" style="background-color:${T.tile}; border-radius:0 12px 12px 0; padding:22px 26px; word-break:break-word; overflow-wrap:break-word;">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="left" style="margin-bottom:10px;">
@@ -1678,7 +1678,11 @@ We'd love to see you there!</textarea>
       .fluid { max-width: 100% !important; height: auto !important; }
       .pad-mobile { padding-left: 24px !important; padding-right: 24px !important; }
       .tile-pad   { padding-left: 18px !important; padding-right: 18px !important; }
-      .date-col   { width: 84px !important; }
+      /* 84px was too narrow for the longest labels — "WEDNESDAY" needs 90px and
+         "SEPTEMBER" 86px at 11px/2px tracking, so they wrapped onto two lines.
+         96px + 1px tracking clears the longest of both lists with room to spare. */
+      .date-col   { width: 96px !important; }
+      .date-lbl   { letter-spacing: 1px !important; }
       .date-num   { font-size: 36px !important; }
       .page-title { font-size: 32px !important; }
       .logo-mark  { width: 64px !important; }
