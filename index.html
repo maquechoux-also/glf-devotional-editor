@@ -1634,6 +1634,10 @@ We'd love to see you there!</textarea>
        such sequence, so it survives delivery. Do not "clean up" the spaces. -->
   <meta name="viewport" content="width = device-width, initial-scale = 1.0">
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <!-- Tells Apple Mail / iOS Mail not to auto-scale the message to fit. Without it,
+       iOS decides the layout is too wide, shrinks the WHOLE email, and only
+       recalculates on rotation — which is why rotating and rotating back "fixes" it. -->
+  <meta name="x-apple-disable-message-reformatting">
   <title>Grace Life Fellowship — Weekly News</title>
   <!--[if mso]>
   <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
@@ -1687,11 +1691,16 @@ We'd love to see you there!</textarea>
 
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#081158;">
     <tr>
-      <td align="center" valign="top" style="padding: 28px 12px;">
+      <td align="center" valign="top" style="padding: 28px 12px; word-break:break-word; overflow-wrap:break-word;">
         <!--[if mso]>
         <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td>
         <![endif]-->
-        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; max-width:600px; margin:0 auto;">
+        <!-- word-break is repeated inline here (not just in <style>) because Elexio
+             sometimes strips the style block on send. Both properties inherit, so this
+             one declaration keeps every long email address / URL below from setting a
+             minimum width wider than the phone — the thing that makes iOS Mail give up
+             on reflow and zoom the whole email out. -->
+        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; max-width:600px; margin:0 auto; word-break:break-word; overflow-wrap:break-word;">
 
           <!-- HEADER (logo + title on the navy shell) -->
           <tr>
@@ -1699,7 +1708,7 @@ We'd love to see you there!</textarea>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td width="88" valign="middle" style="width:88px;">
-                    <img src="${LOGO}" alt="Grace Life Fellowship" width="88" class="logo-mark" style="width:88px; height:auto; display:block; border:0; outline:none; text-decoration:none;">
+                    <img src="${LOGO}" alt="Grace Life Fellowship" width="88" class="logo-mark" style="width:88px; max-width:100%; height:auto; display:block; border:0; outline:none; text-decoration:none;">
                   </td>
                   <td width="24" style="width:24px; font-size:0; line-height:0;">&nbsp;</td>
                   <td valign="middle">
@@ -1763,7 +1772,7 @@ ${announcePanel}
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
-                    <img src="${WORDMARK}" alt="Grace Life Fellowship" width="220" class="fluid" style="width:220px; height:auto; display:block; margin:0 auto; border:0; outline:none; text-decoration:none;">
+                    <img src="${WORDMARK}" alt="Grace Life Fellowship" width="220" class="fluid" style="width:220px; max-width:100%; height:auto; display:block; margin:0 auto; border:0; outline:none; text-decoration:none;">
                   </td>
                 </tr>
                 <tr>
