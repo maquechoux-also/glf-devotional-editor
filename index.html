@@ -1508,6 +1508,22 @@ We'd love to see you there!</textarea>
       }).join('');
     }
 
+    /* ── Date-badge abbreviations ──────────────────────────────────────────────
+       The badge column is narrow, so full names like WEDNESDAY / SEPTEMBER wrap to
+       two lines and look cramped. The email shows the standard three-letter forms
+       instead; the editor fields keep the full names so they stay easy to read and
+       edit. Anything the client types that isn't a real day/month (e.g. "Sat & Sun")
+       is passed through untouched. */
+    const DOW_ABBREV = { sunday:'Sun', monday:'Mon', tuesday:'Tue', wednesday:'Wed',
+                         thursday:'Thu', friday:'Fri', saturday:'Sat' };
+    const MONTH_ABBREV = { january:'Jan', february:'Feb', march:'Mar', april:'Apr',
+                           may:'May', june:'Jun', july:'Jul', august:'Aug',
+                           september:'Sep', october:'Oct', november:'Nov', december:'Dec' };
+    function abbrevDate(value, map) {
+      const key = (value || '').trim().toLowerCase().replace(/\.$/, '');
+      return map[key] || value;
+    }
+
     function renderEventTiles() {
       // The email follows the on-screen card order exactly — what you arrange with
       // the ⠿ grip / ▲▼ buttons is what sends. Use "⇅ Sort by Date" to snap the
@@ -1518,7 +1534,9 @@ We'd love to see you there!</textarea>
         const g = cls => card.querySelector('.' + cls).value.trim();
         const T = THEMES[card.querySelector('.ev-theme').value] || THEMES['All Church'];
         const dateText = T.onAccent;
-        const dow = esc(g('ev-dow')), day = esc(g('ev-day')), month = esc(g('ev-month'));
+        const dow = esc(abbrevDate(g('ev-dow'), DOW_ABBREV));
+        const day = esc(g('ev-day'));
+        const month = esc(abbrevDate(g('ev-month'), MONTH_ABBREV));
         const group = esc(g('ev-group')), title = esc(g('ev-title'));
         const body = eventBody(card.querySelector('.ev-body').value);
         const tile = `
@@ -1678,11 +1696,9 @@ We'd love to see you there!</textarea>
       .fluid { max-width: 100% !important; height: auto !important; }
       .pad-mobile { padding-left: 24px !important; padding-right: 24px !important; }
       .tile-pad   { padding-left: 18px !important; padding-right: 18px !important; }
-      /* 84px was too narrow for the longest labels — "WEDNESDAY" needs 90px and
-         "SEPTEMBER" 86px at 11px/2px tracking, so they wrapped onto two lines.
-         96px + 1px tracking clears the longest of both lists with room to spare. */
-      .date-col   { width: 96px !important; }
-      .date-lbl   { letter-spacing: 1px !important; }
+      /* Labels are abbreviated (WED / SEP), so the badge is back to its original
+         width and tracking — the longest label is now ~34px in an 84px column. */
+      .date-col   { width: 84px !important; }
       .date-num   { font-size: 36px !important; }
       .page-title { font-size: 32px !important; }
       .logo-mark  { width: 64px !important; }
