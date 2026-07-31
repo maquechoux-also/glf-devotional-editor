@@ -381,6 +381,11 @@
     .pick-title { font-size: 13.5px; font-weight: 700; color: var(--navy); }
     .pick-meta { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
     .pick-row.is-past .pick-date, .pick-row.is-past .pick-title { color: #9aa8bd; }
+    .pick-group {
+      font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #8ea5a0; padding: 10px 10px 4px; border-top: 1px solid #e6edf6; margin-top: 4px;
+    }
+    .pick-group:first-child { border-top: none; margin-top: 0; padding-top: 4px; }
     .btn-add {
       width: 100%;
       background: #f0f4ff;
@@ -639,7 +644,7 @@ We'd love to see you there!</textarea>
           <div class="section-icon">🔗</div>
           <div>
             <h2>Load from Google Sheet</h2>
-            <p>Optional — pull this week's events straight from the shared events calendar instead of typing them in</p>
+            <p>Pull this week's content from the shared sheet. Rows <strong>with a date</strong> become events; rows <strong>without a date</strong> become announcements.</p>
           </div>
         </div>
         <div class="field">
@@ -650,7 +655,7 @@ We'd love to see you there!</textarea>
 
         <div id="w_picker_wrap" style="display:none;">
           <div class="picker-head">
-            <span class="picker-title">Choose what goes in this week's email</span>
+            <span class="picker-title">Ticked items are in this week's email</span>
             <span class="picker-links">
               <button class="picker-link" onclick="pickerSetAll(true)">Select all</button>
               <button class="picker-link" onclick="pickerSetAll(false)">Clear</button>
@@ -661,8 +666,7 @@ We'd love to see you there!</textarea>
         </div>
 
         <div class="btn-row">
-          <button class="btn-add" onclick="loadFromSheet()">⬇ Load Events from Sheet</button>
-          <button class="btn-add" id="w_add_selected" onclick="addSelectedFromSheet()" style="display:none;">✓ Add Selected to Events</button>
+          <button class="btn-add" onclick="loadFromSheet()">⬇ Load / Refresh from Sheet</button>
         </div>
       </div>
 
@@ -1200,69 +1204,112 @@ We'd love to see you there!</textarea>
       };
     }
 
-    // Everything the last sheet load returned: { date, suggested, past, ev }.
+    // Everything the last sheet load returned, split by the Type column.
+    // Each entry: { date, suggested, past, kind:'event'|'announcement', ev|an }.
     let SHEET_ROWS = [];
+
+    // Ticking a box adds that card immediately; unticking removes it. Cards you
+    // added by hand (no sheet index) are never touched. Cards already on screen are
+    // reused rather than rebuilt, so edits and manual order survive a re-tick.
+    function syncPickerToCards() {
+      const evWrap = document.getElementById('weekly-events');
+      const anWrap = document.getElementById('weekly-announcements');
+
+      [...document.querySelectorAll('#w_picker input[type=checkbox]')].forEach(cb => {
+        const i = +cb.dataset.idx;
+        const row = SHEET_ROWS[i];
+        const wrap = row.kind === 'announcement' ? anWrap : evWrap;
+        const sel = row.kind === 'announcement' ? '.announce-card' : '.event-card';
+        const existing = [...wrap.querySelectorAll(sel)].find(c => c.dataset.sheetIdx === String(i));
+
+        if (cb.checked && !existing) {
+          const el = row.kind === 'announcement' ? announcementCardEl(row.an) : eventCardEl(row.ev);
+          el.dataset.sheetIdx = String(i);
+          wrap.appendChild(el);
+          el.querySelectorAll('input, textarea').forEach(initField);
+        } else if (!cb.checked && existing) {
+          existing.remove();
+        }
+      });
+
+      renderEventNumbers();
+      renderAnnouncementNumbers();
+      updatePickerCount();
+    }
+
+    function updatePickerCount() {
+      const evN = document.querySelectorAll('#weekly-events .event-card').length;
+      const anN = document.querySelectorAll('#weekly-announcements .announce-card').length;
+      sheetStatus('In this week\'s email: ' + evN + ' event' + (evN === 1 ? '' : 's') +
+        ' and ' + anN + ' announcement' + (anN === 1 ? '' : 's') +
+        '. Tick or untick above to add/remove them — drag the ⠿ grip (or ▲▼) to reorder.', 'ok');
+    }
+
+    function pickRowEl(row, i) {
+      const label = document.createElement('label');
+      label.className = 'pick-row' + (row.past ? ' is-past' : '');
+      const swatch = row.kind === 'announcement' ? '#8ea5a0' : THEMES[row.ev.theme].accent;
+      label.innerHTML =
+        '<input type="checkbox" data-idx="' + i + '"' + (row.suggested ? ' checked' : '') +
+        ' onchange="syncPickerToCards()">' +
+        '<span class="pick-swatch" style="background:' + swatch + '"></span>' +
+        '<span class="pick-date"></span>' +
+        '<span class="pick-body"><span class="pick-title"></span><div class="pick-meta"></div></span>';
+      label.querySelector('.pick-date').textContent = row.date
+        ? row.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : '—';
+      label.querySelector('.pick-title').textContent =
+        row.kind === 'announcement' ? row.an.headline : row.ev.title;
+      const note = row.past ? ' · already passed' : (row.suggested ? '' : ' · outside this week');
+      label.querySelector('.pick-meta').textContent =
+        (row.kind === 'announcement' ? (row.an.eyebrow || 'Announcement') : row.ev.theme) + note;
+      return label;
+    }
 
     function renderPicker() {
       const list = document.getElementById('w_picker');
       list.innerHTML = '';
-      SHEET_ROWS.forEach((row, i) => {
-        const T = THEMES[row.ev.theme];
-        const label = document.createElement('label');
-        label.className = 'pick-row' + (row.past ? ' is-past' : '');
-        label.innerHTML =
-          '<input type="checkbox" data-idx="' + i + '"' + (row.suggested ? ' checked' : '') + '>' +
-          '<span class="pick-swatch" style="background:' + T.accent + '"></span>' +
-          '<span class="pick-date"></span>' +
-          '<span class="pick-body"><span class="pick-title"></span><div class="pick-meta"></div></span>';
-        label.querySelector('.pick-date').textContent =
-          row.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        label.querySelector('.pick-title').textContent = row.ev.title;
-        label.querySelector('.pick-meta').textContent =
-          row.ev.theme + (row.past ? ' · already passed' : (row.suggested ? '' : ' · outside this week'));
-        list.appendChild(label);
+      const groups = [
+        ['Events', SHEET_ROWS.map((r, i) => [r, i]).filter(([r]) => r.kind === 'event')],
+        ['Announcements', SHEET_ROWS.map((r, i) => [r, i]).filter(([r]) => r.kind === 'announcement')]
+      ];
+      groups.forEach(([title, entries]) => {
+        if (!entries.length) return;
+        const head = document.createElement('div');
+        head.className = 'pick-group';
+        head.textContent = title;
+        list.appendChild(head);
+        entries.forEach(([row, i]) => list.appendChild(pickRowEl(row, i)));
       });
       document.getElementById('w_picker_wrap').style.display = '';
-      document.getElementById('w_add_selected').style.display = '';
     }
 
     function pickerSetAll(on) {
       document.querySelectorAll('#w_picker input[type=checkbox]').forEach(c => c.checked = on);
+      syncPickerToCards();
     }
     function pickerSetWindow() {
       document.querySelectorAll('#w_picker input[type=checkbox]').forEach(c => {
         c.checked = !!SHEET_ROWS[+c.dataset.idx].suggested;
       });
+      syncPickerToCards();
     }
 
-    function addSelectedFromSheet() {
-      const chosen = [...document.querySelectorAll('#w_picker input[type=checkbox]')]
-        .filter(c => c.checked)
-        .map(c => SHEET_ROWS[+c.dataset.idx]);
-      if (!chosen.length) { sheetStatus('Tick at least one event to add.', 'error'); return; }
-
-      const wrap = document.getElementById('weekly-events');
-      const existing = wrap.querySelectorAll('.event-card').length;
-      const edited = [...wrap.querySelectorAll('.event-card input, .event-card textarea')]
-        .some(el => el.value.trim() && !el.classList.contains('is-default'));
-      if (existing && edited &&
-          !confirm('Replace the ' + existing + ' event card(s) below with ' + chosen.length +
-                   ' from the sheet? Any edits you made to those cards will be lost.')) {
-        sheetStatus('Kept the existing cards — nothing was replaced.');
-        return;
-      }
-
-      wrap.innerHTML = '';
-      chosen.forEach(row => {
-        const el = eventCardEl(row.ev);
-        wrap.appendChild(el);
-        el.querySelectorAll('input, textarea').forEach(initField);
-      });
-      renderEventNumbers();
-      sheetStatus('✅ Added ' + chosen.length + ' event' + (chosen.length === 1 ? '' : 's') +
-        ' — they are in sheet-date order. Drag the ⠿ grip (or use ▲▼) to reorder them any way you like.', 'ok');
-      showToast('✅ ' + chosen.length + ' event(s) added');
-      wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // On a fresh load, drop the cards that didn't come from the sheet (the seeded
+    // sample content) so the sheet selection isn't stacked on top of it. Anything
+    // the client actually typed is kept unless they say otherwise.
+    function clearNonSheetCards() {
+      const cards = [
+        ...document.querySelectorAll('#weekly-events .event-card'),
+        ...document.querySelectorAll('#weekly-announcements .announce-card')
+      ].filter(c => !c.dataset.sheetIdx);
+      if (!cards.length) return;
+      const edited = cards.some(c => [...c.querySelectorAll('input, textarea')]
+        .some(el => el.value.trim() && !el.classList.contains('is-default')));
+      if (edited && !confirm('Clear the ' + cards.length +
+          ' card(s) already in the editor and use the sheet selection instead?\n\n' +
+          'Cancel keeps them and adds the sheet events alongside.')) return;
+      cards.forEach(c => c.remove());
     }
 
     function loadFromSheet() {
@@ -1287,9 +1334,11 @@ We'd love to see you there!</textarea>
           const iTitle = find('event', 'title');
           const iBody  = find('detail', 'description', 'body');
           const iTheme = find('theme', 'ministry', 'color');
-          const iGroup = find('group', 'label');
-          if (iDate < 0 || iTitle < 0) {
-            sheetStatus('The sheet needs at least a "Date" column and an "Event" column.', 'error');
+          const iGroup = find('group', 'label', 'eyebrow');
+          const iType  = find('type', 'kind');
+          const iQuote = find('quote', 'highlight');
+          if (iTitle < 0) {
+            sheetStatus('The sheet needs an "Event" column (the event or announcement title).', 'error');
             return;
           }
 
@@ -1303,20 +1352,50 @@ We'd love to see you there!</textarea>
 
           let skipped = 0;
           SHEET_ROWS = rows.slice(1).map(r => {
-            const d = parseSheetDate(r[iDate]);
-            const endD = iEnd >= 0 && iEnd !== iDate ? parseSheetDate(r[iEnd]) : null;
             const title = (r[iTitle] || '').trim();
-            if (!d || !title) { if (r.some(x => x.trim())) skipped++; return null; }
+            if (!title) { if (r.some(x => x.trim())) skipped++; return null; }
+
+            const d = iDate >= 0 ? parseSheetDate(r[iDate]) : null;
+            const endD = iEnd >= 0 && iEnd !== iDate ? parseSheetDate(r[iEnd]) : null;
+
+            // No date = announcement. A calendar event always has a day attached;
+            // notices (missions updates, staff openings, giving news) don't. An
+            // optional Type column can still force it either way.
+            const typed = iType >= 0 ? (r[iType] || '').trim() : '';
+            const kind = /^ann/i.test(typed) ? 'announcement'
+                       : /^ev/i.test(typed)  ? 'event'
+                       : (d ? 'event' : 'announcement');
+
+            if (kind === 'announcement') {
+              // Announcements are usually undated — those stay available every week.
+              const dated = !!d;
+              const inWindow = dated && d >= anchor && d <= end;
+              const ongoing  = !!(endD && d && d <= anchor && endD >= anchor);
+              return {
+                kind, date: d,
+                suggested: !dated || inWindow || ongoing,
+                past: dated && d < anchor && !ongoing,
+                an: {
+                  eyebrow:  iGroup >= 0 ? (r[iGroup] || '').trim() : '',
+                  headline: title,
+                  body:     iBody  >= 0 ? (r[iBody]  || '').trim() : '',
+                  quote:    iQuote >= 0 ? (r[iQuote] || '').trim() : ''
+                }
+              };
+            }
+
+            // (An "event" with no date can only arrive via an explicit Type value.)
+            if (!d) { skipped++; return null; }
             const inWindow = d >= anchor && d <= end;
             const ongoing  = !!(endD && d <= anchor && endD >= anchor);
             return {
-              date: d,
+              kind, date: d,
               suggested: inWindow || ongoing,
               past: d < anchor && !ongoing,
               ev: rowToEvent(d, iTheme >= 0 ? r[iTheme] : '', iGroup >= 0 ? r[iGroup] : '',
                              title, iBody >= 0 ? r[iBody] : '')
             };
-          }).filter(Boolean).sort((a, b) => a.date - b.date);
+          }).filter(Boolean).sort((a, b) => (a.date || 0) - (b.date || 0));
 
           if (!SHEET_ROWS.length) {
             sheetStatus('Connected, but no usable rows were found — every row needs a date and an event name.', 'error');
@@ -1324,15 +1403,20 @@ We'd love to see you there!</textarea>
           }
 
           renderPicker();
+          clearNonSheetCards();
+          syncPickerToCards();
+
           const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          const suggested = SHEET_ROWS.filter(r => r.suggested).length;
-          let note = 'Loaded ' + SHEET_ROWS.length + ' event' + (SHEET_ROWS.length === 1 ? '' : 's') +
-            ' from the sheet at ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) +
-            '. ' + suggested + ' fall in this week\'s range (' + fmt(anchor) + '–' + fmt(end) +
-            ') and are pre-checked — tick or untick anything, then click “Add Selected to Events”.';
-          if (skipped) note += ' ' + skipped + ' row(s) ignored (missing date or event name).';
+          const nEv = SHEET_ROWS.filter(r => r.kind === 'event').length;
+          const nAn = SHEET_ROWS.length - nEv;
+          let note = 'Sheet read at ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) +
+            ' — ' + nEv + ' event' + (nEv === 1 ? '' : 's') +
+            (nAn ? ' and ' + nAn + ' announcement' + (nAn === 1 ? '' : 's') : '') +
+            '. Everything dated ' + fmt(anchor) + '–' + fmt(end) + ' is ticked and already in the email below.';
+          if (nAn) note += ' Undated rows became announcements.';
+          if (skipped) note += ' ' + skipped + ' row(s) ignored (no event name).';
           sheetStatus(note, 'ok');
-          showToast('✅ Sheet loaded — choose your events');
+          showToast('✅ Sheet loaded');
         })
         .catch(err => sheetStatus('Could not read the sheet (' + err.message +
           '). Make sure it is published to the web as CSV — File → Share → Publish to web → Comma-separated values.', 'error'));
