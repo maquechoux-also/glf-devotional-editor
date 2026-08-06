@@ -779,6 +779,7 @@ We'd love to see you there!</textarea>
 
   <div class="toast" id="toast">✅ HTML copied! Now paste it into Elexio's code view.</div>
 
+  <script src="bulletin-fonts.js"></script>
   <script>
     // Auto-convert straight " (inch mark) to curly “ ” based on context.
     // Opening when preceded by start-of-string, whitespace, or opening bracket; otherwise closing.
@@ -2412,16 +2413,16 @@ ${announcePanel}
       if (bSameDay(row.date, bulletinDate())) {
         tile = '<div style="width:var(--tilew,44px);flex-shrink:0;background:' + shade +
           ';display:flex;align-items:center;justify-content:center;padding:7px 4px;text-align:center">' +
-          '<span style="font-family:\'Archivo Narrow\',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;line-height:1.1;color:' + tc + '">Today</span></div>';
+          '<span style="font-family:\'SAA D\',\'Archivo Narrow\',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;line-height:1.1;color:' + tc + '">Today</span></div>';
       } else {
         const dow = (ev.dow || '').slice(0, 3);
         const mon = (ev.month || '').slice(0, 3);
         const day = String(parseInt(ev.day, 10) || ev.day || '');
         tile = '<div style="width:var(--tilew,44px);flex-shrink:0;background:' + shade +
           ';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px;text-align:center">' +
-          '<span style="font-family:\'Archivo Narrow\',sans-serif;font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:' + tc + '">' + dow + '</span>' +
-          '<span style="font-family:\'Archivo Narrow\',sans-serif;font-size:var(--daynum,22px);font-weight:700;line-height:1.1;color:' + tc + '">' + day + '</span>' +
-          '<span style="font-family:\'Archivo Narrow\',sans-serif;font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:' + tc + '">' + mon + '</span></div>';
+          '<span style="font-family:\'SAA D\',\'Archivo Narrow\',sans-serif;font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:' + tc + '">' + dow + '</span>' +
+          '<span style="font-family:\'SAA E\',\'Archivo Narrow\',sans-serif;font-size:var(--daynum,22px);font-weight:700;line-height:1.1;color:' + tc + '">' + day + '</span>' +
+          '<span style="font-family:\'SAA D\',\'Archivo Narrow\',sans-serif;font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:' + tc + '">' + mon + '</span></div>';
       }
       const fine = (ev.fine || '').trim();
       const fineHTML = fine ? '<p style="margin:4px 0 0 0;font-size:var(--detail,9.5px);line-height:var(--dlead,12px);color:#555555">' + bInline(fine) + '</p>' : '';
@@ -2514,7 +2515,8 @@ ${announcePanel}
       return '<!DOCTYPE html><html><head><meta charset="utf-8">' +
         '<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">' +
         '<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;1,400;1,500&family=Archivo+Narrow:wght@600;700&display=swap" rel="stylesheet">' +
-        '<style>@page{size:letter;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#e9e9ee}' +
+        '<style>' + (window.BULLETIN_FONTS_CSS || '') +
+        '@page{size:letter;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#e9e9ee}' +
         '.sheet{width:8.5in;height:11in;margin:0 auto;background:#fff;display:flex;padding:30px;' +
         'font-family:\'Satoshi\',\'Segoe UI\',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
         '.sheet + .sheet{margin-top:16px}' +
