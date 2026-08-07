@@ -770,7 +770,7 @@ We'd love to see you there!</textarea>
             <p>Two identical bulletins per sheet, front (cover) then back (Weekly News). Black &amp; white — no bleed.</p>
           </div>
         </div>
-        <iframe id="b_preview" title="Bulletin preview" style="width:100%; height:900px; border:1px solid var(--line,#e2e8e6); border-radius:12px; background:#e9e9ee;"></iframe>
+        <iframe id="b_preview" title="Bulletin preview" scrolling="no" style="width:100%; height:520px; border:1px solid var(--line,#e2e8e6); border-radius:12px; background:#e9e9ee; overflow:hidden; display:block;"></iframe>
       </div>
 
     </div><!-- /#tab-bulletin -->
@@ -2520,16 +2520,42 @@ ${announcePanel}
         '.sheet{width:8.5in;height:11in;margin:0 auto;background:#fff;display:flex;padding:30px;' +
         'font-family:\'Satoshi\',\'Segoe UI\',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
         '.sheet + .sheet{margin-top:16px}' +
-        '@media print{html,body{background:#fff}.sheet{margin:0}.sheet + .sheet{margin-top:0;page-break-before:always}}' +
+        '@media print{html,body{background:#fff;zoom:1 !important}.sheet{margin:0}.sheet + .sheet{margin-top:0;page-break-before:always}}' +
         '</style></head><body style="' + vars + '">' +
         '<div class="sheet">' + cover + cover + '</div>' +
         '<div class="sheet">' + news + news + '</div>' +
         '</body></html>';
     }
 
+    // Scale the preview to the panel width and grow the iframe to the full document
+    // height, so both letter sheets show at once with no internal cropping/scroll.
+    // Uses CSS zoom (screen only — @media print forces zoom:1, so the PDF stays true
+    // letter size). The .sheet is 8.5in = 816px @96dpi.
+    function fitBulletinPreview() {
+      const f = document.getElementById('b_preview');
+      if (!f) return;
+      try {
+        const doc = f.contentDocument;
+        if (!doc || !doc.body) return;
+        const b = doc.body;
+        b.style.zoom = '';                                   // measure at natural size
+        let avail = f.clientWidth || 0;
+        if (avail < 50) avail = 816;                         // panel not laid out yet
+        const natH = Math.max(b.scrollHeight, doc.documentElement.scrollHeight);
+        const scale = Math.min(1, avail / 816);
+        b.style.zoom = scale;
+        f.style.height = Math.ceil(natH * scale) + 'px';
+      } catch (e) {}
+    }
+    // Refit if the window resizes while the bulletin tab is open.
+    window.addEventListener('resize', function () {
+      if (typeof activeTab !== 'undefined' && activeTab === 'bulletin') fitBulletinPreview();
+    });
+
     function renderBulletin() {
       const f = document.getElementById('b_preview');
       if (!f) return;
+      f.onload = fitBulletinPreview;   // fires once the srcdoc document is ready
       f.srcdoc = buildBulletinDoc();
       const st = document.getElementById('b_sheet_status');
       if (st) {
@@ -2563,7 +2589,16 @@ ${announcePanel}
       renderBulletin();
       const f = document.getElementById('b_preview');
       if (!f || !f.contentWindow) return;
-      setTimeout(function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { window.print(); } }, 300);
+      setTimeout(function () {
+        try {
+          const b = f.contentDocument && f.contentDocument.body;
+          const prev = b ? b.style.zoom : '';
+          if (b) b.style.zoom = '';          // print at true letter size
+          f.contentWindow.focus();
+          f.contentWindow.print();
+          if (b) b.style.zoom = prev;        // restore preview scaling
+        } catch (e) { window.print(); }
+      }, 300);
     }
 
     /* ══════════════════ LOAD ══════════════════ */
