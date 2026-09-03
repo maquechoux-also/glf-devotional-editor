@@ -2729,7 +2729,8 @@ ${announcePanel}
       if (cut > 0) {
         box.className = 'fit-banner is-over';
         icon.textContent = '⚠';
-        main.textContent = cut + ' item' + (cut === 1 ? " won't" : "s won't") + ' fit on the page';
+        main.textContent = cut + ' item' + (cut === 1 ? " won't" : "s won't") +
+          ' fit on the page. You can do better than that!';
         sub.textContent  = 'The last ' + (cut === 1 ? 'one is' : cut + ' are') +
           ' cut off the printed bulletin. Untick ' + (cut === 1 ? 'an item' : 'a few') +
           ' below, or set Density to Compact or Condensed.';
