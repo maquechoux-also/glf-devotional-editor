@@ -723,7 +723,7 @@ We'd love to see you there!</textarea>
     <div id="tab-bulletin" class="tab-panel">
 
       <div class="intro">
-        <strong>How to use:</strong> Set <strong>this Sunday's date</strong>, click <strong>Load / Refresh from Sheet</strong> (it reads the same Google Sheet as Weekly News), then check the preview. When it looks right, click <strong>🖨 Export PDF</strong> in the header, choose <em>Save as PDF</em> at <strong>Letter</strong> size, print, and cut each sheet down the middle — every sheet gives you two bulletins.
+        <strong>How to use:</strong> Set <strong>this Sunday's date</strong>, click <strong>Load / Refresh from Sheet</strong> (it reads the same Google Sheet as Weekly News), then <strong>tick the items you want on the bulletin</strong> — a bulletin holds far less than the email, so pick the ones that matter this week. Watch the preview as you go. When it looks right, click <strong>🖨 Export PDF</strong> in the header, choose <em>Save as PDF</em> at <strong>Letter</strong> size, print, and cut each sheet down the middle — every sheet gives you two bulletins.
       </div>
 
       <!-- ── BULLETIN SETUP ── -->
@@ -737,7 +737,7 @@ We'd love to see you there!</textarea>
         <div class="field-grid">
           <div class="field">
             <label>Bulletin Date <span class="hint">the Sunday it's handed out</span></label>
-            <input type="text" id="b_date" value="August 2, 2026" onchange="renderBulletin()">
+            <input type="text" id="b_date" value="August 2, 2026" onchange="bulletinDateChanged()">
           </div>
           <div class="field">
             <label>Density <span class="hint">tighten to fit more events on the page</span></label>
@@ -755,10 +755,23 @@ We'd love to see you there!</textarea>
         <div class="section-header">
           <div>
             <h2>Content from Google Sheet</h2>
-            <p>Pulls the same published sheet as Weekly News. Set the link once on the Weekly News tab — it's shared here. Dated rows become events (with a “Today” or date badge); undated rows become the notices at the bottom. The <strong>Fine Print</strong> column becomes the small grey line under an item.</p>
+            <p>Pulls the same published sheet as Weekly News. Set the link once on the Weekly News tab — it's shared here. Dated rows become events (with a “Today” or date badge); undated rows become the notices at the bottom. The <strong>Fine Print</strong> column becomes the small grey line under an item. <strong>Tick only what should print</strong> — your choices stick when you refresh the sheet.</p>
           </div>
         </div>
         <p class="sheet-status" id="b_sheet_status">No sheet loaded yet — click Load below.</p>
+
+        <div id="b_picker_wrap" style="display:none;">
+          <div class="picker-head">
+            <span class="picker-title">Ticked items print on the bulletin</span>
+            <span class="picker-links">
+              <button class="picker-link" onclick="bPickerSetAll(true)">Select all</button>
+              <button class="picker-link" onclick="bPickerSetAll(false)">Clear</button>
+              <button class="picker-link" onclick="bPickerSetWindow()">This week only</button>
+            </span>
+          </div>
+          <div class="picker-list" id="b_picker"></div>
+        </div>
+
         <button class="btn-add" onclick="loadBulletinFromSheet()">⬇ Load / Refresh from Sheet</button>
       </div>
 
@@ -770,6 +783,7 @@ We'd love to see you there!</textarea>
             <p>Two identical bulletins per sheet, front (cover) then back (Weekly News). Black &amp; white — no bleed.</p>
           </div>
         </div>
+        <p class="sheet-status" id="b_fit_status" style="display:none"></p>
         <iframe id="b_preview" title="Bulletin preview" scrolling="no" style="width:100%; height:520px; border:1px solid var(--line,#e2e8e6); border-radius:12px; background:#e9e9ee; overflow:hidden; display:block;"></iframe>
       </div>
 
@@ -839,7 +853,7 @@ We'd love to see you there!</textarea>
       document.getElementById('dlBtn').style.display   = onBulletin ? 'none' : '';
       document.getElementById('copyBtn').style.display = onBulletin ? 'none' : '';
       document.getElementById('pdfBtn').style.display  = onBulletin ? '' : 'none';
-      if (onBulletin) renderBulletin();
+      if (onBulletin) { renderBulletinPicker(); renderBulletin(); }
       // Keep the tab in the URL so each email type is directly linkable/bookmarkable
       // (index.html#weekly opens straight to the events editor).
       history.replaceState(null, '', '#' + name);
@@ -1514,8 +1528,8 @@ We'd love to see you there!</textarea>
           if (skipped) note += ' ' + skipped + ' row(s) ignored (no event name).';
           sheetStatus(note, 'ok');
           showToast('✅ Sheet loaded');
-          // The bulletin reads the same SHEET_ROWS — keep its preview in sync.
-          if (typeof renderBulletin === 'function') renderBulletin();
+          // The bulletin reads the same SHEET_ROWS — reseed its picker and preview.
+          if (typeof syncBulletinFromSheet === 'function') syncBulletinFromSheet();
         })
         .catch(err => sheetStatus('Could not read the sheet (' + err.message +
           '). Make sure it is published to the web as CSV — File → Share → Publish to web → Comma-separated values.', 'error'));
@@ -2473,17 +2487,138 @@ ${announcePanel}
       '</div>';
     }
 
+    /* ── Which sheet rows actually print ─────────────────────────────────────
+       A bulletin holds a fraction of what the email does, so every row is opt-in
+       per week. Choices are keyed by a row *signature* (kind + date + title)
+       rather than the array index, so Load / Refresh keeps them: rows that are
+       still in the sheet stay as they were left, rows that disappeared are
+       forgotten, and brand-new rows fall back to the same "this week" suggestion
+       the Weekly News picker uses. */
+    let B_PICK = null;    // Set of selected signatures — null until the first load
+    let B_KNOWN = null;   // every signature the last load offered
+
+    function bRowSig(row) {
+      const t = row.kind === 'announcement' ? (row.an.headline || '') : (row.ev.title || '');
+      const d = row.date ? row.date.getFullYear() + '-' + (row.date.getMonth() + 1) + '-' + row.date.getDate() : '';
+      return row.kind + '|' + d + '|' + t;
+    }
+
+    function bSheetRows() {
+      return (typeof SHEET_ROWS !== 'undefined' && SHEET_ROWS) ? SHEET_ROWS : [];
+    }
+
+    // Re-seed the selection after a sheet load, preserving prior explicit choices.
+    function bSyncSelection() {
+      const prevPick = B_PICK, prevKnown = B_KNOWN;
+      B_PICK = new Set(); B_KNOWN = new Set();
+      bSheetRows().forEach(row => {
+        const sig = bRowSig(row);
+        B_KNOWN.add(sig);
+        const seen = prevKnown && prevKnown.has(sig);
+        if (seen ? prevPick.has(sig) : !!row.suggested) B_PICK.add(sig);
+      });
+    }
+
+    function bIsPicked(row) {
+      return B_PICK ? B_PICK.has(bRowSig(row)) : !!row.suggested;
+    }
+    function bulletinRows() {
+      return bSheetRows().filter(bIsPicked);
+    }
+
+    function bPickToggle(cb) {
+      if (!B_PICK) bSyncSelection();
+      const row = bSheetRows()[+cb.dataset.idx];
+      if (!row) return;
+      const sig = bRowSig(row);
+      if (cb.checked) B_PICK.add(sig); else B_PICK.delete(sig);
+      renderBulletin();
+    }
+    function bPickerSetAll(on) {
+      if (!B_PICK) bSyncSelection();
+      bSheetRows().forEach(r => {
+        const sig = bRowSig(r);
+        if (on) B_PICK.add(sig); else B_PICK.delete(sig);
+      });
+      renderBulletinPicker(); renderBulletin();
+    }
+    function bPickerSetWindow() {
+      B_PICK = new Set();
+      bSheetRows().forEach(r => { if (r.suggested) B_PICK.add(bRowSig(r)); });
+      renderBulletinPicker(); renderBulletin();
+    }
+
+    function bPickRowEl(row, i) {
+      const label = document.createElement('label');
+      label.className = 'pick-row' + (row.past ? ' is-past' : '');
+      const swatch = row.kind === 'announcement' ? '#8ea5a0' : bThemeShade(row.ev.theme);
+      label.innerHTML =
+        '<input type="checkbox" data-idx="' + i + '"' + (bIsPicked(row) ? ' checked' : '') +
+        ' onchange="bPickToggle(this)">' +
+        '<span class="pick-swatch" style="background:' + swatch + '"></span>' +
+        '<span class="pick-date"></span>' +
+        '<span class="pick-body"><span class="pick-title"></span><div class="pick-meta"></div></span>';
+      label.querySelector('.pick-date').textContent =
+        bSameDay(row.date, bulletinDate()) ? 'Today'
+          : (row.date ? row.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—');
+      label.querySelector('.pick-title').textContent =
+        row.kind === 'announcement' ? row.an.headline : row.ev.title;
+      const note = row.past ? ' · already passed' : '';
+      label.querySelector('.pick-meta').textContent =
+        (row.kind === 'announcement' ? (row.an.eyebrow || 'Notice')
+                                     : (row.ev.group || row.ev.theme || 'Event')) + note;
+      return label;
+    }
+
+    function renderBulletinPicker() {
+      const list = document.getElementById('b_picker');
+      const wrap = document.getElementById('b_picker_wrap');
+      if (!list || !wrap) return;
+      const rows = bSheetRows();
+      list.innerHTML = '';
+      if (!rows.length) { wrap.style.display = 'none'; return; }
+      const groups = [
+        ['Events',  rows.map((r, i) => [r, i]).filter(([r]) => r.kind === 'event')],
+        ['Notices', rows.map((r, i) => [r, i]).filter(([r]) => r.kind === 'announcement')]
+      ];
+      groups.forEach(([title, entries]) => {
+        if (!entries.length) return;
+        const head = document.createElement('div');
+        head.className = 'pick-group';
+        head.textContent = title;
+        list.appendChild(head);
+        entries.forEach(([row, i]) => list.appendChild(bPickRowEl(row, i)));
+      });
+      wrap.style.display = '';
+    }
+
+    // The bulletin date drives the "Today" label in the picker as well as the page.
+    function bulletinDateChanged() {
+      renderBulletinPicker();
+      renderBulletin();
+    }
+
+    // Called by the Weekly News loader once a fresh sheet is in SHEET_ROWS.
+    function syncBulletinFromSheet() {
+      bSyncSelection();
+      renderBulletinPicker();
+      renderBulletin();
+    }
+
     function bulletinNewsCol() {
-      const rows = (typeof SHEET_ROWS !== 'undefined' && SHEET_ROWS) ? SHEET_ROWS : [];
+      const rows = bulletinRows();
       const events = rows.filter(r => r.kind === 'event');
       const notices = rows.filter(r => r.kind === 'announcement');
+      const empty = bSheetRows().length
+        ? 'Nothing ticked yet — choose what prints under <strong>Content from Google Sheet</strong>.'
+        : 'No events loaded yet — click <strong>Load / Refresh from Sheet</strong>.';
       const cards = events.length
         ? events.map(bulletinEventCard).join('')
-        : '<p style="margin:0;font-size:12px;color:#999999">No dated events loaded yet — click <strong>Load / Refresh from Sheet</strong>.</p>';
+        : (notices.length ? '' : '<p style="margin:0;font-size:12px;color:#999999">' + empty + '</p>');
       const noticeBlock = notices.length
         ? '<div style="display:flex;flex-direction:column;gap:8px;margin-top:22px">' + notices.map(bulletinNotice).join('') + '</div>'
         : '';
-      return '<div style="width:50%;box-sizing:border-box;padding:0 20px;display:flex;flex-direction:column">' +
+      return '<div class="news-col" style="width:50%;box-sizing:border-box;padding:0 20px;display:flex;flex-direction:column;overflow:hidden">' +
         '<h1 style="margin:0 0 8px 0;font-size:21px;line-height:1.02;font-weight:800;color:#111111;letter-spacing:-.5px">Weekly News</h1>' +
         '<div style="width:56px;height:3px;background:#111111;margin-bottom:13px"></div>' +
         '<div style="display:flex;flex-direction:column;gap:var(--cardgap,5px)">' + cards + '</div>' +
@@ -2542,10 +2677,31 @@ ${announcePanel}
         let avail = f.clientWidth || 0;
         if (avail < 50) avail = 816;                         // panel not laid out yet
         const natH = Math.max(b.scrollHeight, doc.documentElement.scrollHeight);
+        // The news column is clipped to the sheet, so content taller than the box
+        // is silently cut off the printed page — catch that while zoom is off.
+        const col = doc.querySelector('.news-col');
+        setBulletinFitStatus(!!col && col.scrollHeight > col.clientHeight + 2);
         const scale = Math.min(1, avail / 816);
         b.style.zoom = scale;
         f.style.height = Math.ceil(natH * scale) + 'px';
       } catch (e) {}
+    }
+
+    // Tell the client, in plain terms, whether the current selection still fits.
+    function setBulletinFitStatus(over) {
+      const el = document.getElementById('b_fit_status');
+      if (!el) return;
+      const n = bulletinRows().length;
+      if (!bSheetRows().length) { el.style.display = 'none'; return; }
+      el.style.display = '';
+      if (over) {
+        el.className = 'sheet-status error';
+        el.textContent = 'Too much for the page — the bottom is getting cut off. Untick an item above, ' +
+          'or set Density to Compact or Condensed.';
+      } else {
+        el.className = 'sheet-status ok';
+        el.textContent = n + ' item' + (n === 1 ? '' : 's') + ' selected — everything fits.';
+      }
     }
     // Refit if the window resizes while the bulletin tab is open.
     window.addEventListener('resize', function () {
@@ -2564,11 +2720,13 @@ ${announcePanel}
           st.textContent = 'No sheet loaded yet — click Load below (uses the link set on the Weekly News tab).';
           st.className = 'sheet-status';
         } else {
-          const nEv = rows.filter(r => r.kind === 'event').length;
-          const nAn = rows.length - nEv;
-          st.textContent = rows.length + ' row(s) loaded — ' + nEv + ' event' + (nEv === 1 ? '' : 's') +
+          const sel = bulletinRows();
+          const nEv = sel.filter(r => r.kind === 'event').length;
+          const nAn = sel.length - nEv;
+          st.textContent = rows.length + ' row(s) loaded — printing ' + nEv + ' event' + (nEv === 1 ? '' : 's') +
             (nAn ? ' and ' + nAn + ' notice' + (nAn === 1 ? '' : 's') : '') +
-            '. Events dated ' + ((document.getElementById('b_date') || {}).value || 'that Sunday') + ' show as “Today”.';
+            '. Tick or untick below to change what prints. Events dated ' +
+            ((document.getElementById('b_date') || {}).value || 'that Sunday') + ' show as “Today”.';
           st.className = 'sheet-status ok';
         }
       }
