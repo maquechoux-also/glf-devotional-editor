@@ -429,7 +429,6 @@
     .btn-row { display: flex; gap: 10px; }
     .btn-row .btn-add { flex: 1; }
     .sheet-status { font-size: 12.5px; line-height: 1.55; color: #8ea5a0; margin: 0 0 12px; }
-    .sheet-status.ok    { color: #1f7a4d; }
     /* Sheet-loaded confirmation: neutral text, the check carried by a Phosphor
        cloud-check icon rather than by colouring the whole line green. */
     .sheet-status.loaded { display: flex; align-items: flex-start; gap: 7px; color: #46536b; }
@@ -1273,10 +1272,34 @@ We'd love to see you there!</textarea>
       try { localStorage.setItem(SHEET_KEY, v); } catch (e) {}
     }
 
+    // Phosphor "cloud-check" (regular) — inlined so the editor stays one file.
+    const SHEET_OK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">' +
+      '<path d="M160,40A88.09,88.09,0,0,0,81.29,88.67,64,64,0,1,0,72,216h88a88,88,0,0,0,0-176Zm0,160H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.11A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,72,72Zm37.66-93.66a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L144,148.69l42.34-42.35A8,8,0,0,1,197.66,106.34Z"/></svg>';
+
+    // When the sheet was last read, so the confirmation survives later ticking.
+    let W_LOADED_AT = null;
+    function wLoadedPrefix() {
+      return W_LOADED_AT
+        ? 'Sheet loaded at ' + W_LOADED_AT.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) + ' — '
+        : '';
+    }
+
+    // kind 'loaded' is the quiet confirmation: cloud-check icon, neutral text.
+    // 'error' stays red; anything else is plain grey.
     function sheetStatus(msg, kind) {
       const el = document.getElementById('w_sheet_status');
-      el.textContent = msg;
       el.className = 'sheet-status' + (kind ? ' ' + kind : '');
+      el.textContent = '';
+      if (kind === 'loaded') {
+        const ic = document.createElement('span');
+        ic.className = 'status-icon';
+        ic.innerHTML = SHEET_OK_ICON;
+        const tx = document.createElement('span');
+        tx.textContent = msg;
+        el.appendChild(ic); el.appendChild(tx);
+      } else {
+        el.textContent = msg;
+      }
     }
 
     // Minimal RFC-4180 CSV reader — handles quoted cells, embedded commas/newlines
@@ -1369,9 +1392,10 @@ We'd love to see you there!</textarea>
     function updatePickerCount() {
       const evN = document.querySelectorAll('#weekly-events .event-card').length;
       const anN = document.querySelectorAll('#weekly-announcements .announce-card').length;
-      sheetStatus('In this week\'s email: ' + evN + ' event' + (evN === 1 ? '' : 's') +
+      sheetStatus(wLoadedPrefix() + 'in this week\'s email: ' + evN + ' event' + (evN === 1 ? '' : 's') +
         ' and ' + anN + ' announcement' + (anN === 1 ? '' : 's') +
-        '. Tick or untick above to add/remove them — drag the ⠿ grip (or ▲▼) to reorder.', 'ok');
+        '. Tick or untick above to add/remove them — drag the ⠿ grip (or ▲▼) to reorder.',
+        W_LOADED_AT ? 'loaded' : null);
     }
 
     function pickRowEl(row, i) {
@@ -1542,13 +1566,13 @@ We'd love to see you there!</textarea>
           const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           const nEv = SHEET_ROWS.filter(r => r.kind === 'event').length;
           const nAn = SHEET_ROWS.length - nEv;
-          let note = 'Sheet read at ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) +
-            ' — ' + nEv + ' event' + (nEv === 1 ? '' : 's') +
+          W_LOADED_AT = new Date();
+          let note = wLoadedPrefix() + nEv + ' event' + (nEv === 1 ? '' : 's') +
             (nAn ? ' and ' + nAn + ' announcement' + (nAn === 1 ? '' : 's') : '') +
             '. Everything dated ' + fmt(anchor) + '–' + fmt(end) + ' is ticked and already in the email below.';
           if (nAn) note += ' Undated rows became announcements.';
           if (skipped) note += ' ' + skipped + ' row(s) ignored (no event name).';
-          sheetStatus(note, 'ok');
+          sheetStatus(note, 'loaded');
           showToast('✅ Sheet loaded');
           // The bulletin reads the same SHEET_ROWS — reseed its picker and preview.
           if (typeof syncBulletinFromSheet === 'function') syncBulletinFromSheet();
@@ -2428,10 +2452,6 @@ ${announcePanel}
       out = out.replace(/\n/g, '<br>');
       return out;
     }
-
-    // Phosphor "cloud-check" (regular) — inlined so the editor stays one file.
-    const SHEET_OK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">' +
-      '<path d="M160,40A88.09,88.09,0,0,0,81.29,88.67,64,64,0,1,0,72,216h88a88,88,0,0,0,0-176Zm0,160H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.11A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,72,72Zm37.66-93.66a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L144,148.69l42.34-42.35A8,8,0,0,1,197.66,106.34Z"/></svg>';
 
     // When the sheet was last read — shown as part of the load confirmation.
     let B_LOADED_AT = null;
