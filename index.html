@@ -430,6 +430,12 @@
     .btn-row .btn-add { flex: 1; }
     .sheet-status { font-size: 12.5px; line-height: 1.55; color: #8ea5a0; margin: 0 0 12px; }
     .sheet-status.ok    { color: #1f7a4d; }
+    /* Sheet-loaded confirmation: neutral text, the check carried by a Phosphor
+       cloud-check icon rather than by colouring the whole line green. */
+    .sheet-status.loaded { display: flex; align-items: flex-start; gap: 7px; color: #46536b; }
+    .sheet-status.loaded .status-icon { flex-shrink: 0; margin-top: 1px; color: var(--light-blue); }
+    .sheet-status .status-icon svg { display: block; width: 16px; height: 16px; }
+    .sheet-status .status-icon:empty { display: none; }
     .sheet-status.error { color: #c0392b; }
     .ev-theme-row { display: flex; align-items: center; gap: 10px; }
 
@@ -771,7 +777,7 @@ We'd love to see you there!</textarea>
             <p>Pulls the same published sheet as Weekly News. Set the link once on the Weekly News tab — it's shared here. Dated rows become events (with a “Today” or date badge); undated rows become the notices at the bottom. The <strong>Fine Print</strong> column becomes the small grey line under an item. <strong>Tick only what should print</strong> — your choices stick when you refresh the sheet.</p>
           </div>
         </div>
-        <p class="sheet-status" id="b_sheet_status">No sheet loaded yet — click Load below.</p>
+        <p class="sheet-status" id="b_sheet_status"><span class="status-icon" id="b_status_icon"></span><span id="b_status_text">No sheet loaded yet — click Load below.</span></p>
 
         <div id="b_picker_wrap" style="display:none;">
           <div class="picker-head">
@@ -2423,6 +2429,13 @@ ${announcePanel}
       return out;
     }
 
+    // Phosphor "cloud-check" (regular) — inlined so the editor stays one file.
+    const SHEET_OK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">' +
+      '<path d="M160,40A88.09,88.09,0,0,0,81.29,88.67,64,64,0,1,0,72,216h88a88,88,0,0,0,0-176Zm0,160H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.11A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,72,72Zm37.66-93.66a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L144,148.69l42.34-42.35A8,8,0,0,1,197.66,106.34Z"/></svg>';
+
+    // When the sheet was last read — shown as part of the load confirmation.
+    let B_LOADED_AT = null;
+
     function bulletinDate() {
       const t = (document.getElementById('b_date') || {}).value || '';
       const d = parseSheetDate(t);
@@ -2616,6 +2629,7 @@ ${announcePanel}
 
     // Called by the Weekly News loader once a fresh sheet is in SHEET_ROWS.
     function syncBulletinFromSheet() {
+      B_LOADED_AT = new Date();
       bSyncSelection();
       renderBulletinPicker();
       renderBulletin();
@@ -2760,21 +2774,27 @@ ${announcePanel}
       if (!f) return;
       f.onload = fitBulletinPreview;   // fires once the srcdoc document is ready
       f.srcdoc = buildBulletinDoc();
-      const st = document.getElementById('b_sheet_status');
-      if (st) {
+      const st  = document.getElementById('b_sheet_status');
+      const txt = document.getElementById('b_status_text');
+      const ic  = document.getElementById('b_status_icon');
+      if (st && txt && ic) {
         const rows = (typeof SHEET_ROWS !== 'undefined' && SHEET_ROWS) ? SHEET_ROWS : [];
         if (!rows.length) {
-          st.textContent = 'No sheet loaded yet — click Load below (uses the link set on the Weekly News tab).';
           st.className = 'sheet-status';
+          ic.innerHTML = '';
+          txt.textContent = 'No sheet loaded yet — click Load below (uses the link set on the Weekly News tab).';
         } else {
-          const sel = bulletinRows();
-          const nEv = sel.filter(r => r.kind === 'event').length;
-          const nAn = sel.length - nEv;
-          st.textContent = rows.length + ' row(s) loaded — printing ' + nEv + ' event' + (nEv === 1 ? '' : 's') +
+          // What the sheet gave us. How much of it prints is the banner's job.
+          const nEv = rows.filter(r => r.kind === 'event').length;
+          const nAn = rows.length - nEv;
+          st.className = 'sheet-status loaded';
+          ic.innerHTML = SHEET_OK_ICON;
+          txt.textContent = 'Sheet loaded' +
+            (B_LOADED_AT ? ' at ' + B_LOADED_AT.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '') +
+            ' — ' + nEv + ' event' + (nEv === 1 ? '' : 's') +
             (nAn ? ' and ' + nAn + ' notice' + (nAn === 1 ? '' : 's') : '') +
-            '. Tick or untick below to change what prints. Events dated ' +
+            ' available. Events dated ' +
             ((document.getElementById('b_date') || {}).value || 'that Sunday') + ' show as “Today”.';
-          st.className = 'sheet-status ok';
         }
       }
     }
