@@ -9,3 +9,6 @@
 .idea/
 *.swp
 *.swo
+
+# Local-only email drafts (not part of the deployed editor)
+email-sunday-conversations.html
