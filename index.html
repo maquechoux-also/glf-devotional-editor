@@ -2737,8 +2737,9 @@ ${announcePanel}
       } else {
         box.className = 'fit-banner is-ok';
         icon.textContent = '✓';
-        main.textContent = 'Everything fits' + (n ? ' — ' + n + ' item' + (n === 1 ? '' : 's') + ' selected' : '');
-        sub.textContent  = n ? 'All of it prints on the bulletin.' : 'Nothing selected yet.';
+        main.textContent = "Everything fits! We're all so proud of you.";
+        sub.textContent  = n ? n + ' item' + (n === 1 ? '' : 's') + ' selected — all of it prints on the bulletin.'
+                             : 'Nothing selected yet.';
       }
     }
     // Refit if the window resizes while the bulletin tab is open.
