@@ -493,6 +493,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" id="tabbtn-devotional" onclick="switchTab('devotional')">✦ Weekly Devotional</button>
       <button class="tab-btn" id="tabbtn-weekly" onclick="switchTab('weekly')">📅 Weekly News</button>
+      <button class="tab-btn" id="tabbtn-letter" onclick="switchTab('letter')">✉️ Letter</button>
       <button class="tab-btn" id="tabbtn-bulletin" onclick="switchTab('bulletin')">🖨 Print Bulletin</button>
     </div>
 
@@ -737,6 +738,89 @@ We'd love to see you there!</textarea>
 
     </div><!-- /#tab-weekly -->
 
+    <!-- ═══════════════ LETTER TAB ═══════════════ -->
+    <div id="tab-letter" class="tab-panel">
+
+      <div class="tip">
+        <strong>How to use:</strong> For everyday updates to the church family — announcements, family news, prayer needs, meal trains. Write a headline and the letter, add a sign-off if someone is signing it, then click <strong>Copy HTML</strong> in the header and paste into Elexio's code view. The Grace Life letterhead (logo, rules, and footer) is built in.
+      </div>
+
+      <!-- ── HEADLINE ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">✉️</div>
+          <div>
+            <h2>Headline</h2>
+            <p>The bold navy title under the letterhead — usually the same as the email subject</p>
+          </div>
+        </div>
+        <div class="field">
+          <label>Headline</label>
+          <input type="text" id="l_headline" value="Pick Up a Few Extras This Weekend!">
+        </div>
+        <div class="field">
+          <label>Preview Text <span class="hint">short teaser shown in the inbox before someone opens the email</span></label>
+          <input type="text" id="l_preheader" value="Snacks for Front Yard Bikes and candy for Fall Fest — drop off at the Welcome Booth.">
+        </div>
+      </div>
+
+      <!-- ── LETTER ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">📝</div>
+          <div>
+            <h2>Letter</h2>
+            <p>The body of the email, greeting included</p>
+          </div>
+        </div>
+        <div class="field">
+          <label>Body Copy <span class="hint">one blank line between each paragraph</span></label>
+          <div class="pull-quote-tip">
+            Start a line with <code>## </code> to make it a <strong>bold all-caps subhead</strong> — the lines right under it become its paragraph:<br>
+            <code>## Candy for Fall Fest</code><br>
+            Wrap words in <code>**double asterisks**</code> for <strong>bold navy</strong> emphasis, or <code>*single asterisks*</code> for <em>italics</em>. To <strong>link to a webpage</strong>, highlight the words and click the <strong>🔗 Add Link</strong> button that pops up (or type <code>[words](https://page)</code>).
+          </div>
+          <textarea id="l_body" class="allow-links" rows="16">Grace Life Family,
+
+While you're at the store this weekend, consider picking up a few extra items to help with two things happening at Grace Life!
+
+## Snacks for Front Yard Bikes
+Front Yard Bikes needs snacks for their after-school programs! GLF is collecting boxes of individually wrapped snacks such as granola bars, beef sticks, Cheez-Its, and peanut butter crackers.
+
+## Candy for Fall Fest
+We're also collecting bags of individually wrapped candy as we prepare for [Fall Fest](https://www.gracelifefellowship.org/events)!
+
+You can drop off all donations at the **GLF Welcome Booth**. Thanks for helping us serve our community and prepare for a fun Fall Fest!</textarea>
+        </div>
+      </div>
+
+      <!-- ── SIGN-OFF ── -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">✍️</div>
+          <div>
+            <h2>Sign-off</h2>
+            <p>Optional — clear all three fields to end the letter without a signature</p>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Closing <span class="hint">e.g. Blessings, · Grace &amp; Peace,</span></label>
+            <input type="text" id="l_closing" value="Blessings,">
+          </div>
+          <div class="field">
+            <label>Name</label>
+            <input type="text" id="l_name" value="Tim Boswell">
+          </div>
+        </div>
+        <div class="field">
+          <label>Title <span class="hint">optional — small grey line under the name</span></label>
+          <input type="text" id="l_title" value="Community Pastor">
+        </div>
+      </div>
+
+    </div><!-- /#tab-letter -->
+
     <!-- ═══════════════ PRINT BULLETIN TAB ═══════════════ -->
     <div id="tab-bulletin" class="tab-panel">
 
@@ -859,7 +943,7 @@ We'd love to see you there!</textarea>
     let activeTab = 'devotional';
     function switchTab(name) {
       activeTab = name;
-      ['devotional', 'weekly', 'bulletin'].forEach(t => {
+      ['devotional', 'weekly', 'letter', 'bulletin'].forEach(t => {
         document.getElementById('tab-' + t).classList.toggle('active', t === name);
         document.getElementById('tabbtn-' + t).classList.toggle('active', t === name);
       });
@@ -1625,14 +1709,14 @@ We'd love to see you there!</textarea>
     // Inline formatting for body copy: [words](https://page) → sky-blue link,
     // **bold** → navy strong, *italic* → em, single newlines → <br>.
     // HTML-escape first so user text can't inject markup.
-    function formatInline(s) {
+    function formatInline(s, linkStyle = 'color:#5b95d2; font-weight:600; text-decoration:underline;', boldStyle = 'color:#081158;') {
       let out = esc(s);
       out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
         url = url.replace(/"/g, '%22');
         if (!/^(https?:\/\/|mailto:)/i.test(url)) url = 'https://' + url;
-        return '<a href="' + url + '" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">' + text + '</a>';
+        return '<a href="' + url + '" target="_blank" style="' + linkStyle + '">' + text + '</a>';
       });
-      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#081158;">$1</strong>');
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong style="' + boldStyle + '">$1</strong>');
       out = out.replace(/\*([^*]+)\*/g, '<em>$1</em>');
       out = out.replace(/\n/g, '<br>');
       return out;
@@ -2003,6 +2087,192 @@ ${announcePanel}
 </html>`;
     }
 
+    /* ══════════════════ LETTER ══════════════════ */
+    // Letter body → paragraphs. Blank line = new paragraph. A line starting "## " is a
+    // bold all-caps subhead; any lines right under it become its paragraph (the
+    // "SNACKS FOR FRONT YARD BIKES / details…" pattern in GLF's everyday emails).
+    const LETTER_FONT = "font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif;";
+    const LETTER_LINK = 'color:#081158; font-weight:700; text-decoration:underline; text-decoration-color:#ec8675;';
+    const LETTER_BOLD = 'font-weight:700; color:#081158;';
+    function renderLetterBody(raw) {
+      const blocks = raw.trim().split(/\n[ \t]*\n/).map(b => b.trim()).filter(Boolean);
+      const out = [];
+      blocks.forEach(block => {
+        let lines = [];
+        const flush = () => {
+          if (lines.length) out.push({ type: 'p', text: lines.join('\n') });
+          lines = [];
+        };
+        block.split('\n').forEach(line => {
+          const h = line.match(/^#{1,3}\s+(.+)$/);
+          if (h) { flush(); out.push({ type: 'h', text: h[1].trim() }); }
+          else lines.push(line.trim());
+        });
+        flush();
+      });
+      return out.map((b, i) => {
+        const inner = formatInline(b.text, LETTER_LINK, LETTER_BOLD);
+        if (b.type === 'h') {
+          const mt = i === 0 ? '0' : '30px';
+          return `
+              <p style="margin:${mt} 0 6px 0; ${LETTER_FONT} font-size:14px; line-height:20px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#081158;">${inner}</p>`;
+        }
+        const mb = i === out.length - 1 ? '0' : '18px';
+        return `
+              <p style="margin:0 0 ${mb} 0; ${LETTER_FONT} font-size:16px; line-height:27px; color:#1a1a2e;">${inner}</p>`;
+      }).join('');
+    }
+
+    // Sign-off → closing line in body style, bold navy name, small grey title.
+    // Every part is optional; all three blank drops the sign-off entirely.
+    function renderLetterSignoff(closing, name, title) {
+      if (!closing && !name && !title) return '';
+      let html = '';
+      let first = true;
+      const mt = () => { const m = first ? '32px' : '0'; first = false; return m; };
+      if (closing) html += `
+              <p style="margin:${mt()} 0 4px 0; ${LETTER_FONT} font-size:16px; line-height:27px; color:#1a1a2e;">${closing}</p>`;
+      if (name) html += `
+              <p style="margin:${mt()} 0 0 0; ${LETTER_FONT} font-size:16px; line-height:24px; font-weight:700; color:#081158;">${name}</p>`;
+      if (title) html += `
+              <p style="margin:${mt()} 0 0 0; ${LETTER_FONT} font-size:13px; line-height:20px; color:#7389ab;">${title}</p>`;
+      return html;
+    }
+
+    function buildLetterHTML() {
+      const preheader  = val('l_preheader');
+      const headline   = protectTimes(val('l_headline'));
+      const letterBody = protectTimes(renderLetterBody(document.getElementById('l_body').value));
+      const signoff    = protectTimes(renderLetterSignoff(val('l_closing'), val('l_name'), val('l_title')));
+      const HLOGO = 'https://cdn.prod.website-files.com/661743fdb5eac44694ae2669/6657b906254a3353045df90d_GLF%20Logo%20Horizontal.png';
+
+      return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <!-- Spaces around the equals signs are deliberate: Elexio's mailer eats any equals
+       sign followed by two hex digits (quoted-printable decoding), which corrupts the
+       usual compact form of this tag. The spaced form parses identically and has no
+       such sequence, so it survives delivery. Do not "clean up" the spaces. -->
+  <meta name="viewport" content="width = device-width, initial-scale = 1.0">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Grace Life Fellowship</title>
+  <!--[if mso]>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <![endif]-->
+  <style type="text/css">
+    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800,900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; line-height: 100%; outline: none; text-decoration: none; }
+    /* iOS auto-detects dates/times/addresses and styles them as links — make those render as plain text */
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+    td, p, h1, h2, h3, a, span, li { word-break: break-word !important; overflow-wrap: break-word !important; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; font-family: 'Satoshi', 'Segoe UI', Arial, Helvetica, sans-serif; background-color: #eef3f8; color: #1a1a2e; }
+    .email-container { width: 100% !important; max-width: 600px !important; }
+    /* Constrain ONLY Elexio's auto-appended unsubscribe paragraph (matched by the link it contains) */
+    p:has(a[href*="email_unsubscribe"]) {
+      max-width: 600px !important;
+      margin: 8px auto 24px !important;
+      padding: 0 24px !important;
+      text-align: center !important;
+      font-family: 'Inter', Arial, Helvetica, sans-serif !important;
+      box-sizing: border-box;
+    }
+    a[href*="email_unsubscribe"] {
+      display: inline-block !important;
+      max-width: 100% !important;
+      color: #7389ab !important;
+      font-size: 11px !important;
+      line-height: 18px !important;
+      word-break: break-word !important;
+    }
+    @media screen and (max-width: 620px) {
+      .pad-mobile { padding-left: 24px !important; padding-right: 24px !important; }
+      .letter-headline { font-size: 26px !important; line-height: 32px !important; }
+      .letter-logo { width: 190px !important; }
+    }
+  </style>
+</head>
+<body width="100%" style="margin:0; padding:0; background-color:#eef3f8;">
+
+  <div style="display:none; max-height:0px; overflow:hidden;">${preheader}&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌</div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#eef3f8;">
+    <tr>
+      <td align="center" valign="top" style="padding: 28px 12px; word-break:break-word; overflow-wrap:break-word;">
+        <!--[if mso]>
+        <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td>
+        <![endif]-->
+        <table role="presentation" class="email-container" cellspacing="0" cellpadding="0" border="0" width="100%" style="width:100%; max-width:600px; margin:0 auto; word-break:break-word; overflow-wrap:break-word;">
+
+          <!-- LETTERHEAD: navy top edge -->
+          <tr>
+            <td bgcolor="#081158" style="background-color:#081158; border-radius:12px 12px 0 0; height:8px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td>
+          </tr>
+
+          <!-- LETTERHEAD: logo -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff; padding: 36px 48px 28px 48px;" class="pad-mobile">
+              <a href="https://www.gracelifefellowship.org" target="_blank" style="text-decoration:none;">
+                <img src="${HLOGO}" alt="Grace Life Fellowship" width="220" class="letter-logo" style="width:220px; max-width:100%; height:auto; display:block; border:0; outline:none; text-decoration:none;">
+              </a>
+            </td>
+          </tr>
+
+          <!-- LETTERHEAD: coral + hairline rule -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff; padding: 0 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td width="60" style="width:60px; background-color:#ec8675; height:3px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td>
+                  <td style="background-color:#dfe6f0; height:1px; font-size:0; line-height:0; mso-line-height-rule:exactly;" valign="middle">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- LETTER BODY -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff; padding: 40px 48px 44px 48px;" class="pad-mobile">
+              <h1 class="letter-headline" style="margin:0 0 24px 0; font-family:'Satoshi','Segoe UI',Arial,Helvetica,sans-serif; font-size:30px; line-height:36px; font-weight:800; color:#081158; letter-spacing:-0.4px;">${headline}</h1>${letterBody}${signoff}
+            </td>
+          </tr>
+
+          <!-- LETTERHEAD FOOTER -->
+          <tr>
+            <td bgcolor="#ffffff" style="background-color:#ffffff; padding: 0 48px 30px 48px;" class="pad-mobile">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr><td style="background-color:#dfe6f0; height:1px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td></tr>
+              </table>
+              <p style="margin:22px 0 6px 0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:12px; line-height:20px; color:#7389ab; text-align:center;">Grace Life Fellowship &nbsp;&middot;&nbsp; 10210 Baringer Foreman Road &nbsp;&middot;&nbsp; Baton Rouge, LA 70809<br>Sundays at 10:&zwnj;15&zwnj;am</p>
+              <p style="margin:0; font-family:'Inter',Arial,Helvetica,sans-serif; font-size:12px; line-height:20px; text-align:center;">
+                <a href="https://www.gracelifefellowship.org" target="_blank" style="color:#5b95d2; font-weight:500; text-decoration:none; padding:0 6px;">Website</a><span style="color:#c5d3f0;">&middot;</span><a href="https://www.gracelifefellowship.org/events" target="_blank" style="color:#5b95d2; font-weight:500; text-decoration:none; padding:0 6px;">Events</a><span style="color:#c5d3f0;">&middot;</span><a href="https://www.gracelifefellowship.org/media/main" target="_blank" style="color:#5b95d2; font-weight:500; text-decoration:none; padding:0 6px;">Sermons</a><span style="color:#c5d3f0;">&middot;</span><a href="https://www.gracelifefellowship.org/give" target="_blank" style="color:#5b95d2; font-weight:500; text-decoration:none; padding:0 6px;">Give</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- LETTERHEAD: navy bottom edge -->
+          <tr>
+            <td bgcolor="#081158" style="background-color:#081158; border-radius:0 0 12px 12px; height:8px; font-size:0; line-height:0; mso-line-height-rule:exactly;">&nbsp;</td>
+          </tr>
+
+          <tr><td style="height:16px; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+        </table>
+        <!--[if mso]>
+        </td></tr></table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`;
+    }
+
     // Escape HTML special characters (for user-typed content)
     function esc(str) {
       return str
@@ -2314,7 +2584,9 @@ ${announcePanel}
     // The active tab decides which builder runs. buildHTML() (devotional) keeps its
     // name so build-preview.js can still extract it by regex.
     function currentHTML() {
-      return activeTab === 'weekly' ? buildWeeklyHTML() : buildHTML();
+      if (activeTab === 'weekly') return buildWeeklyHTML();
+      if (activeTab === 'letter') return buildLetterHTML();
+      return buildHTML();
     }
 
     function copyHTML() {
@@ -2354,10 +2626,12 @@ ${announcePanel}
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const dateId = activeTab === 'weekly' ? 'w_weekof' : 'email_date';
-      const date = document.getElementById(dateId).value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
+      // Letters have no date field, so they're named after the headline instead.
+      const nameId = { weekly: 'w_weekof', letter: 'l_headline' }[activeTab] || 'email_date';
+      const prefix = { weekly: 'GLF-Weekly-News-', letter: 'GLF-Letter-' }[activeTab] || 'GLF-Devotional-';
+      const slug = document.getElementById(nameId).value.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       a.href = url;
-      a.download = (activeTab === 'weekly' ? 'GLF-Weekly-News-' : 'GLF-Devotional-') + date + '.html';
+      a.download = prefix + slug + '.html';
       a.click();
       URL.revokeObjectURL(url);
       showToast('⬇ File downloaded!');
@@ -2852,6 +3126,7 @@ ${announcePanel}
     initWeekly();
     // Honor a deep link: index.html#weekly opens the events tab directly.
     if (location.hash === '#weekly') switchTab('weekly');
+    if (location.hash === '#letter') switchTab('letter');
     if (location.hash === '#bulletin') switchTab('bulletin');
   </script>
 

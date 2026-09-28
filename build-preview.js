@@ -3,6 +3,7 @@
 // the standalone, shareable rendered emails:
 //   preview-devotional.html  — from buildHTML() (Weekly Devotional tab)
 //   preview-weekly.html      — from buildWeeklyHTML() (This Week's Events tab)
+//   preview-letter.html      — from buildLetterHTML() (Letter tab)
 // (preview.html is a legacy redirect to preview-devotional.html — not written here.)
 //
 // Usage: node build-preview.js
@@ -141,14 +142,14 @@ function protectTimes(html) {
 
 // Inline formatting, ported from the editor: [text](url) → sky link,
 // **bold** → navy strong, *italic* → em, newline → <br>
-function formatInline(s) {
+function formatInline(s, linkStyle = 'color:#5b95d2; font-weight:600; text-decoration:underline;', boldStyle = 'color:#081158;') {
   return esc(s)
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
       url = url.replace(/"/g, '%22');
       if (!/^(https?:\/\/|mailto:)/i.test(url)) url = 'https://' + url;
-      return '<a href="' + url + '" target="_blank" style="color:#5b95d2; font-weight:600; text-decoration:underline;">' + text + '</a>';
+      return '<a href="' + url + '" target="_blank" style="' + linkStyle + '">' + text + '</a>';
     })
-    .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#081158;">$1</strong>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong style="' + boldStyle + '">$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .replace(/\n/g, '<br>');
 }
@@ -314,3 +315,39 @@ for (const k in wVars) {
 
 fs.writeFileSync('preview-weekly.html', wTemplate);
 console.log('Wrote preview-weekly.html (' + wTemplate.length + ' bytes)');
+
+
+// ─────────────────────────────────────────────────────────────
+// 5. LETTER preview — the body/sign-off renderers are lifted straight out of
+//    index.html (they only depend on esc/formatInline, ported above), so the
+//    preview can't drift from the editor.
+// ─────────────────────────────────────────────────────────────
+const letterSrc = html.match(/\/\* ═+ LETTER ═+ \*\/([\s\S]*?)function buildLetterHTML\(\)/);
+if (!letterSrc) {
+  console.error('ERROR: could not locate the Letter helpers in index.html');
+  process.exit(1);
+}
+const { renderLetterBody, renderLetterSignoff } =
+  new Function('esc', 'formatInline', letterSrc[1] + '\nreturn { renderLetterBody, renderLetterSignoff };')(esc, formatInline);
+
+const lMatch = html.match(/function buildLetterHTML\(\)\s*\{[\s\S]*?return\s+`([\s\S]*?)`;\s*\n\s*\}/);
+if (!lMatch) {
+  console.error('ERROR: could not locate buildLetterHTML() template in index.html');
+  process.exit(1);
+}
+let lTemplate = lMatch[1];
+
+const lVars = {
+  preheader:  val('l_preheader'),
+  headline:   protectTimes(val('l_headline')),
+  letterBody: protectTimes(renderLetterBody(values.l_body || '')),
+  signoff:    protectTimes(renderLetterSignoff(val('l_closing'), val('l_name'), val('l_title'))),
+  HLOGO:      html.match(/const HLOGO = '([^']+)'/)[1],
+};
+
+for (const k in lVars) {
+  lTemplate = lTemplate.split('${' + k + '}').join(lVars[k]);
+}
+
+fs.writeFileSync('preview-letter.html', lTemplate);
+console.log('Wrote preview-letter.html (' + lTemplate.length + ' bytes)');

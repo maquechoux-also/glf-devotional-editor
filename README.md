@@ -1,7 +1,7 @@
 # GLF Email Editor
 
-One editor, two weekly emails for Grace Life Fellowship — the Weekly Devotional and
-Weekly News. Fill in the fields, click **Copy HTML**, paste into Elexio's code view.
+One editor for Grace Life Fellowship's emails — the Weekly Devotional, Weekly News,
+and the everyday Letter. Fill in the fields, click **Copy HTML**, paste into Elexio's code view.
 
 ## Files
 
@@ -10,8 +10,9 @@ Weekly News. Fill in the fields, click **Copy HTML**, paste into Elexio's code v
 | `index.html` | **The editor.** Two tabs: ✦ Weekly Devotional and 📅 Weekly News. Open `index.html#weekly` to land directly on the Weekly News tab. |
 | `preview-devotional.html` | Rendered devotional email (static snapshot, built from the editor's default content). |
 | `preview-weekly.html` | Rendered Weekly News email (static snapshot, built from the editor's default content). |
+| `preview-letter.html` | Rendered Letter email (static snapshot, built from the editor's default content). |
 | `preview.html` | Legacy URL — just redirects to `preview-devotional.html`. |
-| `build-preview.js` | Regenerates both preview files: `node build-preview.js`. |
+| `build-preview.js` | Regenerates the preview files: `node build-preview.js`. |
 
 ## How to test what the emails look like
 
@@ -39,6 +40,12 @@ npx serve -l 8765 .
 ## Notes
 
 - The Copy/Download buttons act on whichever tab is active.
+- **✉ Letter** (`index.html#letter`) is the Grace Life letterhead for everyday updates
+  (announcements, family news, prayer needs, meal trains): a headline, the letter
+  body, and an optional sign-off. In the body, a line starting with `## ` becomes a
+  bold all-caps subhead, and the lines right under it become its paragraph.
+  `**bold**`, `*italic*`, and 🔗 Add Link work as elsewhere. Clear all three
+  sign-off fields to send it unsigned.
 - Event cards on the events tab: **+ Add Event** / **Remove**, with a color theme
   picker covering the nine ministries (All Church, Life Groups, Kids, Middle School,
   High School, All Youth, Men, Women, Discipleship). The five newer palettes come
