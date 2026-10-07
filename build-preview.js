@@ -327,8 +327,8 @@ if (!letterSrc) {
   console.error('ERROR: could not locate the Letter helpers in index.html');
   process.exit(1);
 }
-const { renderLetterBody, renderLetterSignoff } =
-  new Function('esc', 'formatInline', letterSrc[1] + '\nreturn { renderLetterBody, renderLetterSignoff };')(esc, formatInline);
+const { renderLetterBody, renderLetterSignoff, LETTER_RULE } =
+  new Function('esc', 'formatInline', letterSrc[1] + '\nreturn { renderLetterBody, renderLetterSignoff, LETTER_RULE };')(esc, formatInline);
 
 const lMatch = html.match(/function buildLetterHTML\(\)\s*\{[\s\S]*?return\s+`([\s\S]*?)`;\s*\n\s*\}/);
 if (!lMatch) {
@@ -343,6 +343,7 @@ const lVars = {
   letterBody: protectTimes(renderLetterBody(values.l_body || '')),
   signoff:    protectTimes(renderLetterSignoff(val('l_closing'), val('l_name'), val('l_title'))),
   HLOGO:      html.match(/const HLOGO = '([^']+)'/)[1],
+  LETTER_RULE,
 };
 
 for (const k in lVars) {

@@ -43,7 +43,8 @@ npx serve -l 8765 .
 - **✉ Letter** (`index.html#letter`) is the Grace Life letterhead for everyday updates
   (announcements, family news, prayer needs, meal trains): a headline, the letter
   body, and an optional sign-off. In the body, a line starting with `## ` becomes a
-  bold all-caps subhead, and the lines right under it become its paragraph.
+  bold all-caps subhead, and the lines right under it become its paragraph. A line
+  of just `---` puts the coral letterhead rule between announcements.
   `**bold**`, `*italic*`, and 🔗 Add Link work as elsewhere. Clear all three
   sign-off fields to send it unsigned.
 - Event cards on the events tab: **+ Add Event** / **Remove**, with a color theme
