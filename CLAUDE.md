@@ -10,7 +10,7 @@ result into Elexio's code view. No dependencies and no build step.
 - Adam (`quibitai`) also pushes. Pull before you push.
 - The repo is public on purpose (free Pages; Mandy is the only user). Don't make it private.
 - Everything committed is publicly served. Keep drafts and docs out of the repo.
-- The git data lives at `~/git/glf-devotional-editor.git` (this folder is on iCloud). `.git` here is a pointer file.
+- This folder is `Grace-Life/email-editor` on the local disk (moved off iCloud on 11/11/2026), with a normal `.git` inside.
 
 ## Where things live
 - `index.html`: the page, its CSS and all the editor behaviour. Four tabs: `#devotional` (default), `#weekly`, `#letter`, `#bulletin`. 2,000+ lines: grep for what you need, don't read it whole.
