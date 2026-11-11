@@ -1,13 +1,16 @@
 # GLF Email Editor
 
 One editor for Grace Life Fellowship's emails — the Weekly Devotional, Weekly News,
-and the everyday Letter. Fill in the fields, click **Copy HTML**, paste into Elexio's code view.
+and the everyday Letter — plus the printed Bulletin. Fill in the fields, click
+**Copy HTML**, paste into Elexio's code view.
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `index.html` | **The editor.** Two tabs: ✦ Weekly Devotional and 📅 Weekly News. Open `index.html#weekly` to land directly on the Weekly News tab. |
+| `index.html` | **The editor.** Four tabs: ✦ Weekly Devotional, 📅 Weekly News, ✉ Letter and the Print Bulletin. Add `#weekly`, `#letter` or `#bulletin` to the URL to open a tab directly. |
+| `templates.js` | The email templates, shared by the editor and `build-preview.js`. |
+| `bulletin-fonts.js` | The bulletin's date-tile fonts, embedded for the print PDF. |
 | `preview-devotional.html` | Rendered devotional email (static snapshot, built from the editor's default content). |
 | `preview-weekly.html` | Rendered Weekly News email (static snapshot, built from the editor's default content). |
 | `preview-letter.html` | Rendered Letter email (static snapshot, built from the editor's default content). |
@@ -16,9 +19,9 @@ and the everyday Letter. Fill in the fields, click **Copy HTML**, paste into Ele
 
 ## How to test what the emails look like
 
-**Quick look (default content):** open `preview-devotional.html` or
-`preview-weekly.html` in any browser. Regenerate them after editing the defaults in
-`index.html` with:
+**Quick look (default content):** open `preview-devotional.html`,
+`preview-weekly.html` or `preview-letter.html` in any browser. Regenerate them after
+editing the templates or the defaults with:
 
 ```bash
 node build-preview.js
@@ -26,20 +29,22 @@ node build-preview.js
 
 **Real content (what you actually typed):** open `index.html` in a browser, pick a
 tab, fill in the fields, then click **⬇ Download** in the header. The downloaded
-file (`GLF-Devotional-….html` or `GLF-Weekly-News-….html`) is exactly what Elexio
-will send — double-click it to view.
+file is exactly what Elexio will send — double-click it to view.
 
 To run it served locally (optional — plain double-click works too):
 
 ```bash
-npx serve -l 8765 .
-# → http://localhost:8765/index.html        (devotional tab)
-# → http://localhost:8765/index.html#weekly (events tab)
+python3 -m http.server 8777
+# → http://localhost:8777/index.html         (devotional tab)
+# → http://localhost:8777/index.html#weekly  (events tab)
 ```
 
 ## Notes
 
 - The Copy/Download buttons act on whichever tab is active.
+- **Print Bulletin** (`index.html#bulletin`) lays out a 2-up, letter-size, black-and-white
+  bulletin from the same Google Sheet as Weekly News. Tick which sheet items to print;
+  the banner warns when they don't fit. **Export PDF** prints it.
 - **✉ Letter** (`index.html#letter`) is the Grace Life letterhead for everyday updates
   (announcements, family news, prayer needs, meal trains): a headline, the letter
   body, and an optional sign-off. In the body, a line starting with `## ` becomes a
