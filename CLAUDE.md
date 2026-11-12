@@ -6,8 +6,10 @@ result into Elexio's code view. No dependencies and no build step.
 
 ## Deploy
 - GitHub Pages serves `main` from the repo root: https://maquechoux-also.github.io/glf-devotional-editor/
-- **A push to main is a live deploy. Ask before every push.** Use `/ship`.
-- Adam (`quibitai`) also pushes. Pull before you push.
+- **A merge to main is a live deploy. Ask before every merge.** Use `/ship`.
+- Never commit or push to `main`. Pull, work on a branch, and land it by pull request. The description says what changed, by tab.
+- Adam (`quibitai`) also works here. Before merging, check the PR page for conflicts and for other open PRs touching the same files; resolve conflicts on the branch, never by overwriting.
+- Pushing a branch and opening a PR needs no ask and deploys nothing. Branches are public, like everything else in this repo.
 - The repo is public on purpose (free Pages; Mandy is the only user). Don't make it private.
 - Everything committed is publicly served. Keep drafts and docs out of the repo.
 - This folder is `Grace-Life/email-editor` on the local disk (moved off iCloud on 11/11/2026), with a normal `.git` inside.
